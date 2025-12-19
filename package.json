@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15",
@@ -14,6 +19,7 @@
     "better-auth": "^1.4.7",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.41.0",
+    "nanoid": "^5.1.6",
     "next": "16.1.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
