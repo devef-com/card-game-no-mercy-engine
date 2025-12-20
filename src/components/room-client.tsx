@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getRoomState } from "@/src/actions/room";
-import { startGame, playCard, drawCard } from "@/src/actions/game";
+import { startGame, playCard, drawCard, chooseColor } from "@/src/actions/game";
 import { useRouter } from "next/navigation";
 import { Card } from "@/src/lib/game-logic";
 import { cn } from "@/src/lib/utils";
@@ -95,6 +95,11 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
     const isMyTurn = activeGame.currentTurnUserId === currentUser.id;
     const topCard = activeGame.discardPile[activeGame.discardPile.length - 1];
 
+    // Force update if roulette status is pending and it's my turn
+    if (isMyTurn && activeGame.rouletteStatus === "pending_color" && !showColorPicker) {
+      // This is handled by the render condition below, but we ensure state is clean
+    }
+
     if (myPlayer?.isEliminated) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-red-900 text-white">
@@ -103,20 +108,29 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         </div>
       );
     }
-
+    const { drawPile, ...more } = activeGame;
     return (
       <div className="flex flex-col items-center min-h-screen bg-black p-4 text-white relative">
-        {showColorPicker && (
+        <details>
+          <pre className="text-xs">{JSON.stringify(more, null, 2)}</pre>
+        </details>
+        {(showColorPicker || (isMyTurn && activeGame.rouletteStatus === "pending_color")) && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-xl">
-              <h3 className="text-xl font-bold mb-4 text-center text-black dark:text-white">Choose Color</h3>
+              <h3 className="text-xl font-bold mb-4 text-center text-black dark:text-white">
+                {activeGame.rouletteStatus === "pending_color" ? "Choose Color (Roulette)" : "Choose Color"}
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 {["red", "blue", "green", "yellow"].map((color) => (
                   <button
                     key={color}
                     className={`w-24 h-24 rounded-lg ${getBgColorClass(color)} hover:opacity-80 transition-opacity`}
                     onClick={() => {
-                      if (selectedWildCardId) {
+                      if (activeGame.rouletteStatus === "pending_color") {
+                        chooseColor(activeGame.id, color as any).catch((err) => {
+                          alert("Error choosing color: " + err.message);
+                        });
+                      } else if (selectedWildCardId) {
                         playCard(activeGame.id, selectedWildCardId, color).catch((err) => {
                           alert("Error playing card: " + err.message);
                         });
@@ -127,15 +141,17 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                   />
                 ))}
               </div>
-              <button
-                className="mt-4 w-full py-2 bg-gray-200 text-black rounded hover:bg-gray-300"
-                onClick={() => {
-                  setShowColorPicker(false);
-                  setSelectedWildCardId(null);
-                }}
-              >
-                Cancel
-              </button>
+              {activeGame.rouletteStatus !== "pending_color" && (
+                <button
+                  className="mt-4 w-full py-2 bg-gray-200 text-black rounded hover:bg-gray-300"
+                  onClick={() => {
+                    setShowColorPicker(false);
+                    setSelectedWildCardId(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -206,7 +222,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                 )}
                 onClick={() => {
                   if (isMyTurn) {
-                    if (card.color === "wild") {
+                    if (card.color === "wild" && card.type !== "wild_color_roulette") {
                       setSelectedWildCardId(card.id);
                       setShowColorPicker(true);
                     } else {
@@ -222,36 +238,12 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                 ) : (
                   <CardComponent color={card.color} type={card.type} className="w-full h-full" />
                 )}
-                <p className="text-white text-xs absolute top-0">{card.type} - {card.color}</p>
+                {/* <p className="text-white text-xs absolute top-0">{card.type} - {card.color}</p> */}
               </div>
             ))}
           </div>
         </div>
-        <div className="flex gap-2">
-          <div className="w-24 h-36">
-            <CardComponent color={"blue"} type={"discard_all"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"red"} type={"draw10"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"red"} type={"draw2"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"green"} type={"draw4"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"green"} type={"discard_all"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"green"} type={"skip_everyone"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"green"} type={"wild_color_roulette"} className="w-full h-full" />
-          </div>
-          <div className="w-24 h-36">
-            <CardComponent color={"green"} type={"wild_reverse_draw4"} className="w-full h-full" />
-          </div>
+        <div className="hidden gap-2">
           <div className="w-24 h-36">
             <CardComponent color={"green"} type={"skip"} className="w-full h-full" />
           </div>
@@ -301,9 +293,11 @@ const TEXT_COLORS: Record<string, string> = {
 };
 
 function getTextColorClass(color: string) {
+  if (color === "wild") return "text-purple-600";
   return TEXT_COLORS[color] || "text-black";
 }
 
 function getBgColorClass(color: string) {
+  if (color === "wild") return "bg-purple-600";
   return BG_COLORS[color] || "bg-gray-800";
 }

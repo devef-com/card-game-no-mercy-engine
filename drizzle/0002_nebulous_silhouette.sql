@@ -1,0 +1,1 @@
+ALTER TABLE `game` ADD `roulette_status` text;

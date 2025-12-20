@@ -97,6 +97,11 @@ export async function getRoomState(code: string) {
   let activeGame = null;
   if (foundRoom.games && foundRoom.games.length > 0) {
     activeGame = foundRoom.games[0];
+    // Ensure rouletteStatus is passed
+    if (activeGame.rouletteStatus === null) {
+      //@ts-ignore
+      activeGame.rouletteStatus = undefined;
+    }
   }
 
   return { room: foundRoom, players: players.map((p) => p.user), activeGame };

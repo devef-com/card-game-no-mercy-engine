@@ -38,6 +38,7 @@ export interface GameState {
   currentColor: Color;
   stackedPenalty: number;
   winnerId?: string;
+  rouletteStatus?: "pending_color" | "drawing";
 }
 
 export const COLORS: Color[] = ["red", "blue", "green", "yellow"];
@@ -135,19 +136,30 @@ export function initializeGame(
   };
 }
 
+export function getDrawValue(type: CardType): number {
+  switch (type) {
+    case "draw2":
+      return 2;
+    case "draw4":
+    case "wild_reverse_draw4":
+      return 4;
+    case "draw6":
+      return 6;
+    case "draw10":
+      return 10;
+    default:
+      return 0;
+  }
+}
+
 export function canPlayCard(card: Card, gameState: GameState): boolean {
   const topCard = gameState.discardPile[gameState.discardPile.length - 1];
 
   // If there is a stacked penalty, must play a stacking card
   if (gameState.stackedPenalty > 0) {
-    const isDrawCard = [
-      "draw2",
-      "draw4",
-      "draw6",
-      "draw10",
-      "wild_reverse_draw4",
-    ].includes(card.type);
-    return isDrawCard;
+    const currentPenaltyValue = getDrawValue(topCard.type);
+    const newPenaltyValue = getDrawValue(card.type);
+    return newPenaltyValue >= currentPenaltyValue;
   }
 
   if (card.color === "wild") return true;
@@ -192,7 +204,12 @@ export function applyCardEffect(
 
   // Set current color
   if (card.color === "wild") {
-    if (chosenColor) newState.currentColor = chosenColor;
+    if (card.type === "wild_color_roulette") {
+      newState.currentColor = "wild";
+      newState.rouletteStatus = "pending_color";
+    } else if (chosenColor) {
+      newState.currentColor = chosenColor;
+    }
   } else {
     newState.currentColor = card.color;
   }
@@ -248,6 +265,10 @@ export function applyCardEffect(
     case "skip_everyone":
       nextTurnSamePlayer = true;
       break;
+    case "wild_color_roulette":
+      // Logic for roulette is handled in the next player's turn interaction
+      // The next player will choose the color and draw until they get it
+      break;
   }
 
   if (!nextTurnSamePlayer) {
@@ -258,6 +279,61 @@ export function applyCardEffect(
       skip
     );
   }
+
+  return newState;
+}
+
+export function handleRouletteChoice(
+  gameState: GameState,
+  userId: string,
+  chosenColor: Color
+): GameState {
+  let newState = { ...gameState };
+
+  if (newState.rouletteStatus !== "pending_color") return newState;
+
+  newState.currentColor = chosenColor;
+  newState.rouletteStatus = undefined;
+
+  const player = newState.players.find((p) => p.userId === userId);
+  if (!player) return newState;
+
+  // Draw until match
+  while (true) {
+    if (newState.drawPile.length === 0) {
+      if (newState.discardPile.length > 1) {
+        const topCard = newState.discardPile.pop()!;
+        const newDrawPile = newState.discardPile.sort(
+          () => Math.random() - 0.5
+        );
+        newState.drawPile = newDrawPile;
+        newState.discardPile = [topCard];
+      } else {
+        break;
+      }
+    }
+
+    const card = newState.drawPile.pop();
+    if (!card) break;
+
+    player.hand.push(card);
+
+    if (card.color === chosenColor || card.color === "wild") {
+      break;
+    }
+
+    // Mercy rule check is handled in the action to allow DB updates
+    if (player.hand.length >= 25) {
+      player.isEliminated = true;
+      break;
+    }
+  }
+
+  newState.currentTurnUserId = getNextPlayer(
+    newState.currentTurnUserId,
+    newState.players,
+    newState.direction
+  );
 
   return newState;
 }

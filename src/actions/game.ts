@@ -12,6 +12,8 @@ import {
   canPlayCard,
   applyCardEffect,
   getNextPlayer,
+  handleRouletteChoice,
+  Color,
 } from "@/src/lib/game-logic";
 import { nanoid } from "nanoid";
 
@@ -101,6 +103,7 @@ async function getGameState(gameId: string): Promise<GameState | null> {
     currentColor: gameRecord.currentColor as any,
     stackedPenalty: gameRecord.stackedPenalty,
     winnerId: gameRecord.winnerId || undefined,
+    rouletteStatus: gameRecord.rouletteStatus as any,
   };
 }
 
@@ -116,6 +119,7 @@ async function saveGameState(state: GameState) {
       currentColor: state.currentColor,
       stackedPenalty: state.stackedPenalty,
       winnerId: state.winnerId,
+      rouletteStatus: state.rouletteStatus,
     })
     .where(eq(game.id, state.id));
 
@@ -279,5 +283,52 @@ export async function drawCard(gameId: string) {
     userId: session.user.id,
     action: "DRAW",
     metadata: { count: drawCount },
+  });
+}
+
+export async function chooseColor(gameId: string, color: Color) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
+
+  const gameState = await getGameState(gameId);
+  if (!gameState) throw new Error("Game not found");
+
+  if (gameState.currentTurnUserId !== session.user.id)
+    throw new Error("Not your turn");
+
+  if (gameState.rouletteStatus !== "pending_color")
+    throw new Error("Not waiting for color choice");
+
+  const newState = handleRouletteChoice(gameState, session.user.id, color);
+
+  // Check for elimination (Mercy Rule)
+  const player = newState.players.find((p) => p.userId === session.user.id);
+  if (player?.isEliminated) {
+    await db.insert(gameMove).values({
+      id: nanoid(),
+      gameId,
+      userId: session.user.id,
+      action: "ELIMINATED",
+    });
+
+    const activePlayers = newState.players.filter((p) => !p.isEliminated);
+    if (activePlayers.length === 1) {
+      newState.status = "finished";
+      newState.winnerId = activePlayers[0].userId;
+      await db
+        .update(room)
+        .set({ status: "finished" })
+        .where(eq(room.id, newState.roomId));
+    }
+  }
+
+  await saveGameState(newState);
+
+  await db.insert(gameMove).values({
+    id: nanoid(),
+    gameId,
+    userId: session.user.id,
+    action: "CHOOSE_COLOR",
+    metadata: { color },
   });
 }
