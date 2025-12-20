@@ -1,6 +1,6 @@
 {
-  "name": "uno-no-mercy",
-  "version": "0.1.0",
+  "name": "card-no-mercy-engine",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,7 +16,6 @@
   "dependencies": {
     "@base-ui/react": "^1.0.0",
     "@libsql/client": "^0.15.15",
-    "@tursodatabase/database": "^0.3.2",
     "better-auth": "^1.4.7",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
