@@ -3,9 +3,18 @@
 import { useState } from "react";
 import { authClient } from "@/src/lib/client";
 import { createRoom, joinRoom } from "@/src/actions/room";
+import { useQuery } from "@tanstack/react-query";
+import { PlayingRooms } from "@/app/api/rooms/route";
+import Link from "next/link";
 
 export function HomeScreen() {
   const { data: session, isPending, error } = authClient.useSession();
+  const { data: UserRooms } = useQuery<{ rooms: PlayingRooms }>({
+    queryKey: ['rooms'],
+    queryFn: async () => {
+      return fetch('/api/rooms').then(res => res.json());
+    },
+  })
   const [joinCode, setJoinCode] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -118,6 +127,22 @@ export function HomeScreen() {
               Join
             </button>
           </div>
+        </div>
+        <div>
+          <h3 className="text-lg font-bold">Your Rooms</h3>
+          <ul className="mt-2 space-y-2">
+            {UserRooms && UserRooms.rooms.length > 0 ? (
+              UserRooms.rooms.map((room) => (
+                <li key={room.id} className="p-2 border rounded hover:bg-gray-100">
+                  <Link href={`/room/${room.code}`} className="font-medium">
+                    {room.code} - <span className="text-green-800 text-xs">{room.status}</span>
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li className="text-gray-500">You are not part of any rooms yet.</li>
+            )}
+          </ul>
         </div>
       </div>
     </div>

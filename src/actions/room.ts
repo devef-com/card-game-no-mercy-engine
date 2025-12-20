@@ -75,7 +75,6 @@ export async function joinRoom(code: string) {
 }
 
 export async function getRoomState(code: string) {
-  const auth = getAuth();
   const db = getDb();
   const foundRoom = await db.query.room.findFirst({
     where: eq(room.code, code),
