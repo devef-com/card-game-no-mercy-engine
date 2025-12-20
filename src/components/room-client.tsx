@@ -265,7 +265,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </div>
         </div>
         <div className={cn(
-          "absolute inset-0 flex items-center justify-center bg-yellow-400/20 pointer-events-none transition-all duration-500",
+          "fixed inset-0 flex items-center justify-center bg-yellow-400/20 pointer-events-none transition-all duration-500",
           showFlash ? "opacity-100 scale-100" : "opacity-0 scale-105"
         )}>
           <p className="text-6xl font-black text-yellow-400 uppercase italic drop-shadow-2xl">
