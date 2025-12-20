@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { auth } from "@/src/lib/auth";
-import db from "@/src/db/index";
+import { getAuth } from "@/src/lib/auth";
+import { getDb } from "@/src/db/index";
 import { room, roomPlayer } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
 import { RoomClient } from "@/src/components/room-client";
@@ -9,6 +9,8 @@ import { ToastProvider, Toaster } from "@/src/components/base-ui/toast";
 
 export default async function RoomPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
+  const db = getDb();
+  const auth = getAuth();
   const session = await auth.api.getSession({
     headers: await headers(),
   });

@@ -1,8 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import { auth } from "@/src/lib/auth";
-import db from "@/src/db/index";
+import { getAuth } from "@/src/lib/auth";
+import { getDb } from "@/src/db/index";
 import { room, roomPlayer, game, gamePlayer, gameMove } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
 import {
@@ -18,6 +18,8 @@ import {
 import { nanoid } from "nanoid";
 
 export async function startGame(roomId: string) {
+  const db = getDb();
+  const auth = getAuth();
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -77,6 +79,7 @@ export async function startGame(roomId: string) {
 }
 
 async function getGameState(gameId: string): Promise<GameState | null> {
+  const db = getDb();
   const gameRecord = await db.query.game.findFirst({
     where: eq(game.id, gameId),
     with: {
@@ -108,6 +111,7 @@ async function getGameState(gameId: string): Promise<GameState | null> {
 }
 
 async function saveGameState(state: GameState) {
+  const db = getDb();
   await db
     .update(game)
     .set({
@@ -146,6 +150,8 @@ export async function playCard(
   cardId: string,
   chosenColor?: any
 ) {
+  const db = getDb();
+  const auth = getAuth();
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("Unauthorized");
 
@@ -205,6 +211,8 @@ export async function playCard(
 }
 
 export async function drawCard(gameId: string) {
+  const auth = getAuth();
+  const db = getDb();
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("Unauthorized");
 
@@ -287,6 +295,8 @@ export async function drawCard(gameId: string) {
 }
 
 export async function chooseColor(gameId: string, color: Color) {
+  const auth = getAuth();
+  const db = getDb();
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("Unauthorized");
 
