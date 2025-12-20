@@ -11,17 +11,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
     if (type === "reverse") {
       return `
       <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-        <rect width="250" height="370" fill="${
-        color === "wild"
+        <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ca8a04"
-          : "#dc2626"
-      }" />
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ca8a04"
+                : "#dc2626"
+        }" />
         <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
         <path d="M125.2,141.01l-8.8-8.8c-1.01-1.01-.52-2.75.88-3.07l32.4-7.47c1.71-.39,3.38.81,3.54,2.56l3.05,33.25c.17,1.85-1.89,3.06-3.43,2.02l-10.05-6.82-23.01,34.03c-1.7,2.51-5.29,2.72-7.32.46-4.9-5.47-10.92-16.18-.19-29.35l12.92-16.81Z" style="fill: #fff;"/>
         <path d="M129.58,220.71l8.8,8.8c1.01,1.01.52,2.75-.88,3.07l-32.4,7.47c-1.71.39-3.38-.81-3.54-2.56l-3.05-33.25c-.17-1.85,1.89-3.06,3.43-2.02l10.05,6.82,23.01-34.03c1.7-2.51,5.29-2.72,7.32-.46,4.9,5.47,10.92,16.18.19,29.35l-12.92,16.81Z" style="fill: #fff;"/>
@@ -31,17 +30,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
       return `
       <?xml version="1.0" encoding="UTF-8"?>
     <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-      <rect width="250" height="370" fill="${
-        color === "wild"
+      <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ca8a04"
-          : "#dc2626"
-      }" />
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ca8a04"
+                : "#dc2626"
+        }" />
       <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
       <path d="M121.76,141.2c-23.12,0-41.93,18.81-41.93,41.93s18.81,41.93,41.93,41.93,41.93-18.81,41.93-41.93-18.81-41.93-41.93-41.93ZM121.76,151.2c7.89,0,15.12,2.89,20.7,7.65l-47.32,41.87c-3.35-5.05-5.3-11.1-5.3-17.59,0-17.6,14.32-31.93,31.93-31.93ZM121.76,215.06c-7.51,0-14.41-2.61-19.87-6.96l47.07-41.65c2.99,4.86,4.72,10.57,4.72,16.68,0,17.6-14.32,31.93-31.93,31.93Z" style="fill: #fff;"/>
     </svg>
@@ -49,17 +47,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
     } else if (type === "skip_everyone") {
       return `
       <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-        <rect width="250" height="370" fill="${
-        color === "wild"
+        <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ca8a04"
-          : "#dc2626"
-      }"/>
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ca8a04"
+                : "#dc2626"
+        }"/>
         <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
         <path d="M166.56,187.69l13.65-13.65h-11.7c-4.06-21.73-23.15-38.23-46.04-38.23-25.83,0-46.85,21.02-46.85,46.85s21.02,46.85,46.85,46.85c18.92,0,35.88-11.27,43.21-28.72l-5.53-2.32c-6.39,15.21-21.18,25.04-37.68,25.04-22.52,0-40.85-18.33-40.85-40.85s18.33-40.85,40.85-40.85c19.57,0,35.96,13.83,39.93,32.23h-9.36l13.53,13.65Z" style="fill: #fff;"/>
       </svg>
@@ -67,17 +64,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
     } else if (type === "discard_all") {
       return `
       <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-        <rect width="250" height="370" fill="${
-        color === "wild"
+        <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ca8a04"
-          : "#dc2626"
-      }"/>
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ca8a04"
+                : "#dc2626"
+        }"/>
         <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
         <g>
           <rect x="80.42" y="142.4" width="44.32" height="65.39" rx="4.02" ry="4.02" transform="translate(-11.28 7.12) rotate(-3.77)" style="fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
@@ -128,17 +124,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
       return `
       <?xml version="1.0" encoding="UTF-8"?>
         <svg id="Layer_4" data-name="Layer 4" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-          <rect width="250" height="370" fill="${
-        color === "wild"
+          <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ECC501"
-          : "#dc2626"
-      }"/>
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ECC501"
+                : "#dc2626"
+        }"/>
           <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
           <rect x="83.01" y="146.2" width="44.32" height="65.39" rx="4.02" ry="4.02" style="fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
           <rect x="116.84" y="168.52" width="44.32" height="65.39" rx="4.02" ry="4.02" style="fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
@@ -154,17 +149,16 @@ export default function CardComponent({ color, type, className }: CardProps) {
       return `
       <?xml version="1.0" encoding="UTF-8"?>
         <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-          <rect width="250" height="370" fill="${
-        color === "wild"
+          <rect width="250" height="370" fill="${color === "wild"
           ? "#a855f7"
           : color === "blue"
-          ? "#2563eb"
-          : color === "green"
-          ? "#16a34a"
-          : color === "yellow"
-          ? "#ECC501"
-          : "#dc2626"
-      }"/>
+            ? "#2563eb"
+            : color === "green"
+              ? "#16a34a"
+              : color === "yellow"
+                ? "#ECC501"
+                : "#dc2626"
+        }"/>
           <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="fill: none; stroke: #fff; stroke-miterlimit: 10;"/>
           <rect x="136.16" y="113.51" width="44.32" height="65.39" rx="4.02" ry="4.02" style="fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
           <rect x="69.61" y="195.28" width="44.32" height="65.39" rx="4.02" ry="4.02" style="fill: #fff; stroke: #000; stroke-miterlimit: 10; stroke-width: 2px;"/>
@@ -220,21 +214,20 @@ export default function CardComponent({ color, type, className }: CardProps) {
       `;
     } else if (type === "draw10") {
       return `
+      <?xml version="1.0" encoding="UTF-8"?>
         <svg id="Layer_3" data-name="Layer 3" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 250 370">
-          <rect width="250" height="370" fill="#000"/>
-          <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="stroke: #000; stroke-miterlimit: 10; fill: none;"/>
-          <rect x="106.63" y="129.29" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #2563eb; stroke: #000; stroke-miterlimit: 10;"/>
-          <g>
-            <polygon points="23.72 26.49 18.84 26.49 18.84 33.85 11.48 33.85 11.48 38.73 18.84 38.73 18.84 46.09 23.72 46.09 23.72 38.73 31.08 38.73 31.08 33.85 23.72 33.85 23.72 26.49" style="fill: #fff;"/>
-            <polygon points="47.2 23.09 42.48 23.09 41.4 23.09 34.68 23.09 34.68 28.13 41.4 28.13 41.4 46.05 34.68 46.05 34.68 51.09 41.4 51.09 42.48 51.09 46.12 51.09 47.2 51.09 53.92 51.09 53.92 46.05 47.2 46.05 47.2 23.09" style="fill: #000;"/>
-            <path d="M77.82,26.73c-.97-1.33-2.2-2.38-3.68-3.14-1.48-.76-3.23-1.14-5.26-1.14s-3.79.38-5.28,1.14c-1.49.76-2.73,1.81-3.7,3.14-.97,1.33-1.69,2.89-2.16,4.66s-.7,3.66-.7,5.66c0,2.72.42,5.19,1.26,7.4.84,2.21,2.13,3.98,3.88,5.3,1.75,1.32,3.98,1.98,6.7,1.98s4.91-.66,6.66-1.98c1.75-1.32,3.04-3.09,3.88-5.3.84-2.21,1.26-4.68,1.26-7.4,0-2-.23-3.89-.7-5.66-.47-1.77-1.19-3.33-2.16-4.66ZM74.08,41.59c-.37,1.43-.98,2.59-1.82,3.5-.84.91-1.97,1.36-3.38,1.36s-2.55-.45-3.4-1.36c-.85-.91-1.47-2.07-1.84-3.5-.37-1.43-.56-2.94-.56-4.54s.19-3.07.56-4.5c.37-1.43.99-2.59,1.84-3.48.85-.89,1.99-1.34,3.4-1.34s2.54.45,3.38,1.34c.84.89,1.45,2.05,1.82,3.48s.56,2.93.56,4.5-.19,3.11-.56,4.54Z" style="fill: #fff;"/>
-            <polygon points="180.58 324.51 175.7 324.51 175.7 331.87 168.34 331.87 168.34 336.75 175.7 336.75 175.7 344.11 180.58 344.11 180.58 336.75 187.94 336.75 187.94 331.87 180.58 331.87 180.58 324.51" style="fill: #000;"/>
-            <polygon points="204.06 321.11 199.34 321.11 198.26 321.11 191.54 321.11 191.54 326.15 198.26 326.15 198.26 344.07 191.54 344.07 191.54 349.11 198.26 349.11 199.34 349.11 202.98 349.11 204.06 349.11 210.78 349.11 210.78 344.07 204.06 344.07 204.06 321.11" style="fill: #fff;"/>
-            <path d="M236.84,329.41c-.47-1.77-1.19-3.33-2.16-4.66-.97-1.33-2.2-2.38-3.68-3.14-1.48-.76-3.23-1.14-5.26-1.14s-3.79.38-5.28,1.14c-1.49.76-2.73,1.81-3.7,3.14-.97,1.33-1.69,2.89-2.16,4.66s-.7,3.66-.7,5.66c0,2.72.42,5.19,1.26,7.4.84,2.21,2.13,3.98,3.88,5.3,1.75,1.32,3.98,1.98,6.7,1.98s4.91-.66,6.66-1.98c1.75-1.32,3.04-3.09,3.88-5.3.84-2.21,1.26-4.68,1.26-7.4,0-2-.23-3.89-.7-5.66ZM230.94,339.61c-.37,1.43-.98,2.59-1.82,3.5-.84.91-1.97,1.36-3.38,1.36s-2.55-.45-3.4-1.36c-.85-.91-1.47-2.07-1.84-3.5-.37-1.43-.56-2.94-.56-4.54s.19-3.07.56-4.5c.37-1.43.99-2.59,1.84-3.48.85-.89,1.99-1.34,3.4-1.34s2.54.45,3.38,1.34c.84.89,1.45,2.05,1.82,3.48s.56,2.93.56,4.5-.19,3.11-.56,4.54Z" style="fill: #fff;"/>
-          </g>
-          <rect x="97.43" y="158.3" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #dc2626; stroke: #000; stroke-miterlimit: 10;"/>
-          <rect x="112.35" y="193.26" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #ca8a04; stroke: #000; stroke-miterlimit: 10;"/>
-          <rect x="123.55" y="173.34" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #16a34a; stroke: #000; stroke-miterlimit: 10;"/>
+          <rect width="250" height="370"/>
+          <ellipse cx="125" cy="185" rx="136.72" ry="64.53" transform="translate(-97.71 200.75) rotate(-60)" style="stroke: #fff; stroke-miterlimit: 10;"/>
+          <rect x="106.63" y="129.29" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #003f98; stroke: #000; stroke-miterlimit: 10;"/>
+          <polygon points="23.72 26.49 18.84 26.49 18.84 33.85 11.48 33.85 11.48 38.73 18.84 38.73 18.84 46.09 23.72 46.09 23.72 38.73 31.08 38.73 31.08 33.85 23.72 33.85 23.72 26.49" style="fill: #fff;"/>
+          <polygon points="47.2 23.09 42.48 23.09 41.4 23.09 34.68 23.09 34.68 28.13 41.4 28.13 41.4 46.05 34.68 46.05 34.68 51.09 41.4 51.09 42.48 51.09 46.12 51.09 47.2 51.09 53.92 51.09 53.92 46.05 47.2 46.05 47.2 23.09" style="fill: #fff;"/>
+          <path d="M77.82,26.73c-.97-1.33-2.2-2.38-3.68-3.14-1.48-.76-3.23-1.14-5.26-1.14s-3.79.38-5.28,1.14c-1.49.76-2.73,1.81-3.7,3.14-.97,1.33-1.69,2.89-2.16,4.66s-.7,3.66-.7,5.66c0,2.72.42,5.19,1.26,7.4.84,2.21,2.13,3.98,3.88,5.3,1.75,1.32,3.98,1.98,6.7,1.98s4.91-.66,6.66-1.98c1.75-1.32,3.04-3.09,3.88-5.3.84-2.21,1.26-4.68,1.26-7.4,0-2-.23-3.89-.7-5.66-.47-1.77-1.19-3.33-2.16-4.66ZM74.08,41.59c-.37,1.43-.98,2.59-1.82,3.5-.84.91-1.97,1.36-3.38,1.36s-2.55-.45-3.4-1.36c-.85-.91-1.47-2.07-1.84-3.5-.37-1.43-.56-2.94-.56-4.54s.19-3.07.56-4.5c.37-1.43.99-2.59,1.84-3.48.85-.89,1.99-1.34,3.4-1.34s2.54.45,3.38,1.34c.84.89,1.45,2.05,1.82,3.48s.56,2.93.56,4.5-.19,3.11-.56,4.54Z" style="fill: #fff;"/>
+          <polygon points="180.58 324.51 175.7 324.51 175.7 331.87 168.34 331.87 168.34 336.75 175.7 336.75 175.7 344.11 180.58 344.11 180.58 336.75 187.94 336.75 187.94 331.87 180.58 331.87 180.58 324.51" style="fill: #fff;"/>
+          <polygon points="204.06 321.11 199.34 321.11 198.26 321.11 191.54 321.11 191.54 326.15 198.26 326.15 198.26 344.07 191.54 344.07 191.54 349.11 198.26 349.11 199.34 349.11 202.98 349.11 204.06 349.11 210.78 349.11 210.78 344.07 204.06 344.07 204.06 321.11" style="fill: #fff;"/>
+          <path d="M236.84,329.41c-.47-1.77-1.19-3.33-2.16-4.66-.97-1.33-2.2-2.38-3.68-3.14-1.48-.76-3.23-1.14-5.26-1.14s-3.79.38-5.28,1.14c-1.49.76-2.73,1.81-3.7,3.14-.97,1.33-1.69,2.89-2.16,4.66s-.7,3.66-.7,5.66c0,2.72.42,5.19,1.26,7.4.84,2.21,2.13,3.98,3.88,5.3,1.75,1.32,3.98,1.98,6.7,1.98s4.91-.66,6.66-1.98c1.75-1.32,3.04-3.09,3.88-5.3.84-2.21,1.26-4.68,1.26-7.4,0-2-.23-3.89-.7-5.66ZM230.94,339.61c-.37,1.43-.98,2.59-1.82,3.5-.84.91-1.97,1.36-3.38,1.36s-2.55-.45-3.4-1.36c-.85-.91-1.47-2.07-1.84-3.5-.37-1.43-.56-2.94-.56-4.54s.19-3.07.56-4.5c.37-1.43.99-2.59,1.84-3.48.85-.89,1.99-1.34,3.4-1.34s2.54.45,3.38,1.34c.84.89,1.45,2.05,1.82,3.48s.56,2.93.56,4.5-.19,3.11-.56,4.54Z" style="fill: #fff;"/>
+          <rect x="97.43" y="158.3" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #c80019; stroke: #000; stroke-miterlimit: 10;"/>
+          <rect x="112.35" y="193.26" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #ecc501; stroke: #000; stroke-miterlimit: 10;"/>
+          <rect x="123.55" y="173.34" width="29.86" height="44.05" rx="4.02" ry="4.02" style="fill: #007d24; stroke: #000; stroke-miterlimit: 10;"/>
           <g>
             <g>
               <polygon points="53.78 150.09 47.28 150.09 47.28 171.29 26.08 171.29 26.08 177.89 47.28 177.89 47.28 199.09 53.78 199.09 53.78 177.89 75.08 177.89 75.08 171.29 53.78 171.29 53.78 150.09" style="fill: #fff;"/>

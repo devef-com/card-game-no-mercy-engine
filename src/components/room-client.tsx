@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/src/lib/game-logic";
 import { cn } from "@/src/lib/utils";
 import CardComponent from "./Card";
+import { useToast } from "@/src/components/base-ui/toast";
 
 type User = {
   id: string;
@@ -35,7 +36,10 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   const [activeGame, setActiveGame] = useState<any>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedWildCardId, setSelectedWildCardId] = useState<string | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
   const router = useRouter();
+  const { add: toast } = useToast();
+  // const toastManager = Toast.useToastManager();
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -45,12 +49,24 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         setPlayers(state.players);
         setActiveGame(state.activeGame);
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [room.code]);
 
   const isHost = room.hostId === currentUser.id;
+
+  const isMyTurn = activeGame && activeGame.currentTurnUserId === currentUser.id;
+
+  useEffect(() => {
+    if (isMyTurn) {
+      // show blicking indicator or play sound
+      setShowFlash(true);
+      const timeout = setTimeout(() => setShowFlash(false), 1000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isMyTurn]);
 
   if (room.status === "waiting") {
     return (
@@ -128,12 +144,12 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                     onClick={() => {
                       if (activeGame.rouletteStatus === "pending_color") {
                         chooseColor(activeGame.id, color as any).catch((err) => {
-                          alert("Error choosing color: " + err.message);
+                          toast({ title: "Error choosing color", description: err.message, timeout: 2000 });
                         });
                       } else if (selectedWildCardId) {
                         playCard(activeGame.id, selectedWildCardId, color).catch((err) => {
-                          alert("Error playing card: " + err.message);
-                        });
+                          toast({ title: "Error playing card", description: err.message, timeout: 2000, type: "" });
+                        }).finally(() => { console.log("complete") });
                         setShowColorPicker(false);
                         setSelectedWildCardId(null);
                       }
@@ -227,7 +243,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                       setShowColorPicker(true);
                     } else {
                       playCard(activeGame.id, card.id).catch((err) => {
-                        alert("Error playing card: " + err.message);
+                        toast({ title: "Error playing card", description: err.message });
                       });
                     }
                   }
@@ -247,6 +263,14 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           <div className="w-24 h-36">
             <CardComponent color={"green"} type={"skip"} className="w-full h-full" />
           </div>
+        </div>
+        <div className={cn(
+          "absolute inset-0 flex items-center justify-center bg-yellow-400/20 pointer-events-none transition-all duration-500",
+          showFlash ? "opacity-100 scale-100" : "opacity-0 scale-105"
+        )}>
+          <p className="text-6xl font-black text-yellow-400 uppercase italic drop-shadow-2xl">
+            Your Turn!
+          </p>
         </div>
       </div>
     );
