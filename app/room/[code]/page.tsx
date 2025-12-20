@@ -47,6 +47,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   return (
     <RoomClient
       room={foundRoom}
+      //@ts-expect-error
       currentUser={session.user}
       players={players.map((p) => p.user)}
     />

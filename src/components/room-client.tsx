@@ -5,6 +5,7 @@ import { getRoomState } from "@/src/actions/room";
 import { startGame, playCard, drawCard } from "@/src/actions/game";
 import { useRouter } from "next/navigation";
 import { Card } from "@/src/lib/game-logic";
+import { cn } from "@/src/lib/utils";
 
 type User = {
   id: string;
@@ -31,6 +32,8 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   const [room, setRoom] = useState(initialRoom);
   const [players, setPlayers] = useState(initialPlayers);
   const [activeGame, setActiveGame] = useState<any>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [selectedWildCardId, setSelectedWildCardId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -77,9 +80,9 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
               Start Game
             </button>
           )}
-          
+
           {!isHost && (
-             <p className="text-center text-gray-500 italic">Waiting for host to start...</p>
+            <p className="text-center text-gray-500 italic">Waiting for host to start...</p>
           )}
         </div>
       </div>
@@ -101,12 +104,46 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
     }
 
     return (
-      <div className="flex flex-col items-center min-h-screen bg-green-800 p-4 text-white">
+      <div className="flex flex-col items-center min-h-screen bg-black p-4 text-white relative">
+        {showColorPicker && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-xl">
+              <h3 className="text-xl font-bold mb-4 text-center text-black dark:text-white">Choose Color</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {["red", "blue", "green", "yellow"].map((color) => (
+                  <button
+                    key={color}
+                    className={`w-24 h-24 rounded-lg ${getBgColorClass(color)} hover:opacity-80 transition-opacity`}
+                    onClick={() => {
+                      if (selectedWildCardId) {
+                        playCard(activeGame.id, selectedWildCardId, color).catch((err) => {
+                          alert("Error playing card: " + err.message);
+                        });
+                        setShowColorPicker(false);
+                        setSelectedWildCardId(null);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                className="mt-4 w-full py-2 bg-gray-200 text-black rounded hover:bg-gray-300"
+                onClick={() => {
+                  setShowColorPicker(false);
+                  setSelectedWildCardId(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between w-full max-w-4xl mb-8">
           <div>
             <h2 className="text-xl font-bold">Room: {room.code}</h2>
             <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
-            <p>Current Color: <span className={`font-bold ${getColorClass(activeGame.currentColor)}`}>{activeGame.currentColor.toUpperCase()}</span></p>
+            <p>Current Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor)}`}>{activeGame.currentColor.toUpperCase()}</span></p>
             {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-2xl animate-pulse">Penalty: +{activeGame.stackedPenalty}</p>}
           </div>
           <div>
@@ -114,7 +151,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
             {activeGame.players.map((p: any) => {
               const user = players.find(u => u.id === p.userId);
               return (
-                <div key={p.userId} className={`flex items-center gap-2 ${activeGame.currentTurnUserId === p.userId ? "text-yellow-300 font-bold" : ""}`}>
+                <div key={p.userId} className={cn("flex items-center gap-2", activeGame.currentTurnUserId === p.userId && "text-yellow-300 font-bold")}>
                   <span>{user?.name}</span>
                   <span>({p.cardCount} cards)</span>
                   {p.isEliminated && <span className="text-red-500">(Eliminated)</span>}
@@ -125,15 +162,23 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         </div>
 
         <div className="flex gap-8 items-center mb-12">
-          <div 
-            className={`w-32 h-48 bg-blue-900 rounded-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-800 ${isMyTurn ? "ring-4 ring-yellow-400" : ""}`}
+          <div
+            className={cn(
+              "w-32 h-48 bg-blue-900 rounded-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-800",
+              isMyTurn && "ring-4 ring-yellow-400"
+            )}
             onClick={() => isMyTurn && drawCard(activeGame.id)}
           >
             <span className="font-bold">Draw Pile</span>
           </div>
-          
-          <div className="w-32 h-48 bg-white rounded-lg border-2 border-gray-300 flex flex-col items-center justify-center text-black">
-            <span className={`text-2xl font-bold ${getColorClass(topCard.color)}`}>{topCard.type}</span>
+
+          <div className={cn(
+            "w-32 h-48 rounded-lg border-2 flex flex-col items-center justify-center",
+            topCard.type === "number"
+              ? [getBgColorClass(topCard.color), "text-white border-white"]
+              : ["bg-white border-gray-300", getTextColorClass(topCard.color)]
+          )}>
+            <span className="text-2xl font-bold">{topCard.type}</span>
             {topCard.value !== undefined && <span className="text-4xl">{topCard.value}</span>}
             <span className="text-sm">{topCard.color}</span>
           </div>
@@ -143,24 +188,29 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           <h3 className="text-xl font-bold mb-4">Your Hand ({myPlayer?.hand.length}) {myPlayer?.hand.length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {myPlayer?.hand.map((card: Card) => (
-              <div 
+              <div
                 key={card.id}
-                className={`w-24 h-36 bg-white rounded-lg border-2 border-gray-300 flex flex-col items-center justify-center text-black shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer ${isMyTurn ? "hover:border-yellow-400" : "opacity-80"}`}
+                className={cn(
+                  "w-24 h-36 rounded-lg border-2 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer",
+                  card.type === "number"
+                    ? [getBgColorClass(card.color), "text-white border-white"]
+                    : ["bg-white border-gray-300", getTextColorClass(card.color)],
+                  isMyTurn ? "hover:border-yellow-400" : "opacity-80"
+                )}
                 onClick={() => {
                   if (isMyTurn) {
                     if (card.color === "wild") {
-                      const color = prompt("Choose color (red, blue, green, yellow):");
-                      if (color && ["red", "blue", "green", "yellow"].includes(color)) {
-                        playCard(activeGame.id, card.id, color);
-                      }
+                      setSelectedWildCardId(card.id);
+                      setShowColorPicker(true);
                     } else {
-                      playCard(activeGame.id, card.id);
+                      playCard(activeGame.id, card.id).catch((err) => {
+                        alert("Error playing card: " + err.message);
+                      });
                     }
                   }
                 }}
               >
-                <span className={`text-lg font-bold ${getColorClass(card.color)} text-center`}>{card.type}</span>
-                {card.value !== undefined && <span className="text-2xl">{card.value}</span>}
+                <span className="text-lg font-bold text-center">{card.type === 'number' ? card.value : card.type}</span>
               </div>
             ))}
           </div>
@@ -174,9 +224,9 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
       <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black">
         <h1 className="text-4xl font-bold mb-4">Game Over!</h1>
         {activeGame?.winnerId && (
-           <h2 className="text-2xl text-green-600">Winner: {players.find(p => p.id === activeGame.winnerId)?.name}</h2>
+          <h2 className="text-2xl text-green-600">Winner: {players.find(p => p.id === activeGame.winnerId)?.name}</h2>
         )}
-        <button 
+        <button
           className="mt-8 px-6 py-3 bg-blue-600 text-white rounded-lg"
           onClick={() => router.push("/")}
         >
@@ -193,13 +243,26 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   );
 }
 
-function getColorClass(color: string) {
-  switch (color) {
-    case "red": return "text-red-600";
-    case "blue": return "text-blue-600";
-    case "green": return "text-green-600";
-    case "yellow": return "text-yellow-600";
-    case "wild": return "text-purple-600";
-    default: return "text-black";
-  }
+const BG_COLORS: Record<string, string> = {
+  red: "bg-red-600",
+  blue: "bg-blue-600",
+  green: "bg-green-600",
+  yellow: "bg-yellow-400",
+  wild: "bg-purple-600",
+};
+
+const TEXT_COLORS: Record<string, string> = {
+  red: "text-red-600",
+  blue: "text-blue-600",
+  green: "text-green-600",
+  yellow: "text-yellow-600",
+  wild: "text-purple-600",
+};
+
+function getTextColorClass(color: string) {
+  return TEXT_COLORS[color] || "text-black";
+}
+
+function getBgColorClass(color: string) {
+  return BG_COLORS[color] || "bg-gray-800";
 }
