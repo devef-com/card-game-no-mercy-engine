@@ -318,7 +318,7 @@ export function handleRouletteChoice(
 
     player.hand.push(card);
 
-    if (card.color === chosenColor) {
+    if (card.color === chosenColor && card.type === "number") {
       break;
     }
 
