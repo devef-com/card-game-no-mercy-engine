@@ -14,6 +14,7 @@ import {
   getNextPlayer,
   handleRouletteChoice,
   Color,
+  reshuffleDiscardPile,
 } from "@/src/lib/game-logic";
 import { nanoid } from "nanoid";
 
@@ -169,8 +170,8 @@ export async function playCard(
 
   if (!canPlayCard(card, gameState)) throw new Error("Invalid move");
 
-  if (gameState.discardPile.length <= 3) {
-    // take all discarded cards and shuffle again
+  if (gameState.drawPile.length <= 3) {
+    reshuffleDiscardPile(gameState);
   }
 
   // Find identical number cards to discard together
@@ -255,17 +256,8 @@ export async function drawCard(gameId: string) {
   const drawnCards: Card[] = [];
   for (let i = 0; i < drawCount; i++) {
     if (gameState.drawPile.length === 0) {
-      // Reshuffle discard pile (except top)
-      if (gameState.discardPile.length > 1) {
-        const topCard = gameState.discardPile.pop()!;
-        const newDrawPile = gameState.discardPile.sort(
-          () => Math.random() - 0.5
-        );
-        gameState.drawPile = newDrawPile;
-        gameState.discardPile = [topCard];
-      } else {
-        break; // No cards left
-      }
+      reshuffleDiscardPile(gameState);
+      if (gameState.drawPile.length === 0) break;
     }
     const card = gameState.drawPile.pop();
     if (card) drawnCards.push(card);

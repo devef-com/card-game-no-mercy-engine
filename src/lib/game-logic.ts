@@ -89,7 +89,24 @@ export function generateDeck(): Card[] {
 }
 
 export function shuffle(deck: Card[]): Card[] {
-  return deck.sort(() => Math.random() - 0.5);
+  const newDeck = [...deck];
+  for (let i = newDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+  }
+  return newDeck;
+}
+
+export function reshuffleDiscardPile(gameState: GameState) {
+  if (gameState.discardPile.length <= 1) return;
+
+  const topCard = gameState.discardPile.pop()!;
+  const newCards = shuffle(gameState.discardPile);
+
+  // Add new cards to the BOTTOM of the draw pile (start of array)
+  // so that existing cards are drawn first.
+  gameState.drawPile = [...newCards, ...gameState.drawPile];
+  gameState.discardPile = [topCard];
 }
 
 export function initializeGame(
@@ -310,16 +327,8 @@ export function handleRouletteChoice(
   // Draw until match
   while (true) {
     if (newState.drawPile.length === 0) {
-      if (newState.discardPile.length > 1) {
-        const topCard = newState.discardPile.pop()!;
-        const newDrawPile = newState.discardPile.sort(
-          () => Math.random() - 0.5
-        );
-        newState.drawPile = newDrawPile;
-        newState.discardPile = [topCard];
-      } else {
-        break;
-      }
+      reshuffleDiscardPile(newState);
+      if (newState.drawPile.length === 0) break;
     }
 
     const card = newState.drawPile.pop();
