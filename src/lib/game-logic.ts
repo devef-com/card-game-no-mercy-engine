@@ -38,7 +38,7 @@ export interface GameState {
   currentColor: Color;
   stackedPenalty: number;
   winnerId?: string;
-  rouletteStatus?: "pending_color" | "drawing";
+  rouletteStatus?: "pending_color" | "drawing" | null;
 }
 
 export const COLORS: Color[] = ["red", "blue", "green", "yellow"];
@@ -293,7 +293,7 @@ export function handleRouletteChoice(
   if (newState.rouletteStatus !== "pending_color") return newState;
 
   newState.currentColor = chosenColor;
-  newState.rouletteStatus = undefined;
+  newState.rouletteStatus = null;
 
   const player = newState.players.find((p) => p.userId === userId);
   if (!player) return newState;
@@ -318,7 +318,7 @@ export function handleRouletteChoice(
 
     player.hand.push(card);
 
-    if (card.color === chosenColor || card.color === "wild") {
+    if (card.color === chosenColor) {
       break;
     }
 

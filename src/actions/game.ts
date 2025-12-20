@@ -119,7 +119,7 @@ async function saveGameState(state: GameState) {
       currentColor: state.currentColor,
       stackedPenalty: state.stackedPenalty,
       winnerId: state.winnerId,
-      rouletteStatus: state.rouletteStatus,
+      rouletteStatus: state.rouletteStatus || null,
     })
     .where(eq(game.id, state.id));
 
