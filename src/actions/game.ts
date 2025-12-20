@@ -169,10 +169,30 @@ export async function playCard(
 
   if (!canPlayCard(card, gameState)) throw new Error("Invalid move");
 
-  // Remove card from hand
-  player.hand = player.hand.filter((c) => c.id !== cardId);
+  if (gameState.discardPile.length <= 3) {
+    // take all discarded cards and shuffle again
+  }
 
-  // Add to discard pile
+  // Find identical number cards to discard together
+  const duplicatedCards =
+    card.type === "number"
+      ? player.hand.filter(
+          (c) =>
+            c.id !== card.id &&
+            c.type === "number" &&
+            c.color === card.color &&
+            c.value === card.value
+        )
+      : [];
+
+  // Remove played card and duplicates from hand
+  const idsToRemove = new Set([card.id, ...duplicatedCards.map((c) => c.id)]);
+  player.hand = player.hand.filter((c) => !idsToRemove.has(c.id));
+
+  // Add to discard pile (duplicates first, then the played card on top)
+  if (duplicatedCards.length > 0) {
+    gameState.discardPile.push(...duplicatedCards);
+  }
   gameState.discardPile.push(card);
 
   // Apply effects
