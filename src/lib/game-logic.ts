@@ -5,13 +5,12 @@ export type CardType =
   | "reverse"
   | "draw2"
   | "draw4"
-  | "wild"
-  | "wild_draw4"
   | "discard_all"
   | "skip_everyone"
   | "wild_color_roulette"
   | "draw6"
-  | "draw10";
+  | "draw10"
+  | "wild_reverse_draw4";
 
 export interface Card {
   id: string;
@@ -61,33 +60,29 @@ export function generateDeck(): Card[] {
     }
   };
 
-  // Number cards 0-9 (2 of each except 0 usually, but No Mercy has more)
-  // I'll assume 2 of each 0-9 for simplicity + extra action cards
+  // 20 Number Cards per color (2 each of 0-9)
   COLORS.forEach((color) => {
     if (color === "wild") return;
 
-    // Numbers
+    // Numbers 0-9 (2 of each)
     for (let n = 0; n <= 9; n++) {
       addCard(color, "number", n, 2);
     }
 
     // Action cards
-    addCard(color, "skip", undefined, 2);
-    addCard(color, "reverse", undefined, 2);
-    addCard(color, "draw2", undefined, 2);
-    addCard(color, "discard_all", undefined, 1); // Rare?
-    addCard(color, "skip_everyone", undefined, 1);
-    addCard(color, "draw4", undefined, 1); // Colored draw 4 in No Mercy? Or just wild?
-    // Actually Draw 4 is usually Wild, but No Mercy might have colored Draw 2/4 stacking.
-    // I'll stick to standard + known specials.
+    addCard(color, "discard_all", undefined, 3);
+    addCard(color, "draw2", undefined, 3);
+    addCard(color, "draw4", undefined, 2);
+    addCard(color, "reverse", undefined, 3);
+    addCard(color, "skip", undefined, 3);
+    addCard(color, "skip_everyone", undefined, 2);
   });
 
   // Wilds
-  addCard("wild", "wild", undefined, 4);
-  addCard("wild", "wild_draw4", undefined, 4);
-  addCard("wild", "wild_color_roulette", undefined, 4);
-  addCard("wild", "draw6", undefined, 2); // Usually wild?
-  addCard("wild", "draw10", undefined, 2); // Usually wild?
+  addCard("wild", "wild_color_roulette", undefined, 8);
+  addCard("wild", "draw6", undefined, 4);
+  addCard("wild", "draw10", undefined, 4);
+  addCard("wild", "wild_reverse_draw4", undefined, 8);
 
   return shuffle(deck);
 }
@@ -150,7 +145,7 @@ export function canPlayCard(card: Card, gameState: GameState): boolean {
       "draw4",
       "draw6",
       "draw10",
-      "wild_draw4",
+      "wild_reverse_draw4",
     ].includes(card.type);
     return isDrawCard;
   }
@@ -235,8 +230,14 @@ export function applyCardEffect(
       newState.stackedPenalty += 2;
       break;
     case "draw4":
-    case "wild_draw4":
       newState.stackedPenalty += 4;
+      break;
+    case "wild_reverse_draw4":
+      newState.stackedPenalty += 4;
+      newState.direction *= -1;
+      if (newState.players.filter((p) => !p.isEliminated).length === 2) {
+        skip = 1;
+      }
       break;
     case "draw6":
       newState.stackedPenalty += 6;

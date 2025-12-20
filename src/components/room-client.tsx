@@ -6,6 +6,7 @@ import { startGame, playCard, drawCard } from "@/src/actions/game";
 import { useRouter } from "next/navigation";
 import { Card } from "@/src/lib/game-logic";
 import { cn } from "@/src/lib/utils";
+import CardComponent from "./Card";
 
 type User = {
   id: string;
@@ -173,28 +174,34 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </div>
 
           <div className={cn(
-            "w-32 h-48 rounded-lg border-2 flex flex-col items-center justify-center",
+            "w-32 h-48 rounded-lg border-2 flex flex-col items-center justify-center overflow-hidden",
             topCard.type === "number"
               ? [getBgColorClass(topCard.color), "text-white border-white"]
               : ["bg-white border-gray-300", getTextColorClass(topCard.color)]
           )}>
-            <span className="text-2xl font-bold">{topCard.type}</span>
-            {topCard.value !== undefined && <span className="text-4xl">{topCard.value}</span>}
-            <span className="text-sm">{topCard.color}</span>
+            {topCard.type === "number" ? (
+              <>
+                <span className="text-2xl font-bold">{topCard.type}</span>
+                {topCard.value !== undefined && <span className="text-4xl">{topCard.value}</span>}
+                <span className="text-sm">{topCard.color}</span>
+              </>
+            ) : (
+              <CardComponent color={topCard.color} type={topCard.type} className="w-full h-full" />
+            )}
           </div>
         </div>
 
-        <div className="w-full max-w-6xl overflow-x-auto p-4">
+        <div className="relative w-full max-w-6xl overflow-x-auto p-4">
           <h3 className="text-xl font-bold mb-4">Your Hand ({myPlayer?.hand.length}) {myPlayer?.hand.length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {myPlayer?.hand.map((card: Card) => (
               <div
                 key={card.id}
                 className={cn(
-                  "w-24 h-36 rounded-lg border-2 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer",
+                  "w-24 h-36 rounded-lg border-2 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer overflow-hidden",
                   card.type === "number"
                     ? [getBgColorClass(card.color), "text-white border-white"]
-                    : ["bg-white border-gray-300", getTextColorClass(card.color)],
+                    : ["bg-dark border-gray-300", getTextColorClass(card.color)],
                   isMyTurn ? "hover:border-yellow-400" : "opacity-80"
                 )}
                 onClick={() => {
@@ -210,9 +217,43 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                   }
                 }}
               >
-                <span className="text-lg font-bold text-center">{card.type === 'number' ? card.value : card.type}</span>
+                {card.type === 'number' ? (
+                  <span className="text-lg font-bold text-center">{card.value}</span>
+                ) : (
+                  <CardComponent color={card.color} type={card.type} className="w-full h-full" />
+                )}
+                <p className="text-white text-xs absolute top-0">{card.type} - {card.color}</p>
               </div>
             ))}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-24 h-36">
+            <CardComponent color={"blue"} type={"discard_all"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"red"} type={"draw10"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"red"} type={"draw2"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"draw4"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"discard_all"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"skip_everyone"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"wild_color_roulette"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"wild_reverse_draw4"} className="w-full h-full" />
+          </div>
+          <div className="w-24 h-36">
+            <CardComponent color={"green"} type={"skip"} className="w-full h-full" />
           </div>
         </div>
       </div>
