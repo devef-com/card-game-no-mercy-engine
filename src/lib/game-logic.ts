@@ -220,12 +220,20 @@ export function applyCardEffect(
     if (playerIndex !== -1) {
       const player = newState.players[playerIndex];
       const colorToDiscard = newState.currentColor;
-      // Remove matching colors from hand (excluding the played card if it was still there, but it should be gone)
-      const cardsToDiscard = player.hand.filter(
-        (c) => c.color === colorToDiscard
-      );
+      // Remove matching colors from hand
+      const cardsToDiscard = player.hand
+        .filter((c) => c.color === colorToDiscard)
+        .sort((a, b) =>
+          a.type === "discard_all" ? 1 : b.type === "discard_all" ? -1 : 0
+        );
+
       player.hand = player.hand.filter((c) => c.color !== colorToDiscard);
+
+      // The played card is already at the end of discardPile.
+      // To keep it at the end, we insert the other cards before it.
+      const playedCard = newState.discardPile.pop();
       newState.discardPile.push(...cardsToDiscard);
+      if (playedCard) newState.discardPile.push(playedCard);
     }
   }
 
@@ -251,10 +259,11 @@ export function applyCardEffect(
       break;
     case "wild_reverse_draw4":
       newState.stackedPenalty += 4;
-      newState.direction *= -1;
-      if (newState.players.filter((p) => !p.isEliminated).length === 2) {
-        skip = 1;
-      }
+      // disabled as my girlfriend didnt like to lose :c
+      // newState.direction *= -1;
+      // if (newState.players.filter((p) => !p.isEliminated).length === 2) {
+      //   skip = 1;
+      // }
       break;
     case "draw6":
       newState.stackedPenalty += 6;
