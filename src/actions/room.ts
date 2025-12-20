@@ -3,12 +3,14 @@
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { auth } from "@/src/lib/auth";
-import db from "@/src/db/index";
+import { getAuth } from "@/src/lib/auth";
+import { getDb } from "@/src/db/index";
 import { room, roomPlayer, game } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function createRoom() {
+  const auth = getAuth();
+  const db = getDb();
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -36,6 +38,8 @@ export async function createRoom() {
 }
 
 export async function joinRoom(code: string) {
+  const auth = getAuth();
+  const db = getDb();
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -71,6 +75,8 @@ export async function joinRoom(code: string) {
 }
 
 export async function getRoomState(code: string) {
+  const auth = getAuth();
+  const db = getDb();
   const foundRoom = await db.query.room.findFirst({
     where: eq(room.code, code),
     with: {
