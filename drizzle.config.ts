@@ -6,9 +6,10 @@ config();
 export default defineConfig({
   out: "./drizzle",
   schema: "./src/db/schema.ts",
-  dialect: "turso",
+  dialect: "sqlite",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
-    authToken: process.env.DATABASE_AUTH_TOKEN!,
+    url:
+      process.env.DATABASE_URL ||
+      `file:${process.env.DB_FILE_PATH || "sqlite.db"}`,
   },
 });
