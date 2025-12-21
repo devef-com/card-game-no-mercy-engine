@@ -88,13 +88,13 @@ export function generateDeck(): Card[] {
   return shuffle(deck);
 }
 
-export function shuffle(deck: Card[]): Card[] {
-  const newDeck = [...deck];
-  for (let i = newDeck.length - 1; i > 0; i--) {
+export function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
-  return newDeck;
+  return newArray;
 }
 
 export function reshuffleDiscardPile(gameState: GameState) {
