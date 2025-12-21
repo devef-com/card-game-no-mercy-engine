@@ -191,7 +191,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className={cn(
           "text-2xl font-extrabold mb-4 animate-bounce",
-          isMyTurn ? "block text-yellow-400" : "hidden text-white"
+          isMyTurn ? `block ${getTextColorClass(activeGame.currentColor)}` : "hidden text-white"
         )}>
           Tu turno
         </div>
