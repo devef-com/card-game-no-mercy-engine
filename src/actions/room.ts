@@ -16,7 +16,7 @@ export async function createRoom() {
   });
 
   if (!session) {
-    return { error: "Unauthorized" };
+    return redirect("/");
   }
 
   const code = nanoid(6).toUpperCase();
