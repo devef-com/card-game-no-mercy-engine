@@ -42,7 +42,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   // const toastManager = Toast.useToastManager();
 
   useEffect(() => {
-    const interval = setTimeout(async () => {
+    const interval = setInterval(async () => {
       const state = await getRoomState(room.code);
       if (state) {
         setRoom(state.room);
@@ -116,14 +116,6 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
       // This is handled by the render condition below, but we ensure state is clean
     }
 
-    if (myPlayer?.isEliminated) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-red-900 text-white">
-          <h1 className="text-4xl font-bold mb-4">ELIMINATED</h1>
-          <p>You have been shown NO MERCY!</p>
-        </div>
-      );
-    }
     const { drawPile, ...more } = activeGame;
     return (
       <div className="flex flex-col items-center min-h-screen bg-black p-4 text-white relative">
@@ -175,7 +167,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </div>
         )}
 
-        <div className="flex justify-between w-full max-w-4xl mb-8">
+        <div className="flex justify-between w-full max-w-4xl mb-4">
           <div>
             <h2 className="text-xs font-bold">{room.code}</h2>
             <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
@@ -197,10 +189,17 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </div>
         </div>
 
-        <div className="flex gap-8 items-center mb-12">
+        <div className={cn(
+          "text-2xl font-extrabold mb-4 animate-bounce",
+          isMyTurn ? "block text-yellow-400" : "hidden text-white"
+        )}>
+          Tu turno
+        </div>
+
+        <div className="flex gap-8 items-center mb-6">
           <div
             className={cn(
-              "w-32 h-48 bg-blue-900 rounded-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-800",
+              "w-25 h-37 bg-blue-900 rounded-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-800",
               isMyTurn && "ring-4 ring-yellow-400"
             )}
             onClick={() => isMyTurn && drawCard(activeGame.id)}
@@ -209,16 +208,16 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </div>
 
           <div className={cn(
-            "w-32 h-48 rounded-lg border-2 flex flex-col items-center justify-center overflow-hidden",
+            "w-25 h-37 rounded-lg border-2 flex flex-col items-center justify-center overflow-hidden scale-94",
             topCard.type === "number"
               ? [getBgColorClass(topCard.color), "text-white border-white"]
               : ["bg-white border-gray-300", getTextColorClass(topCard.color)]
           )}>
             {topCard.type === "number" ? (
               <>
-                <span className="text-2xl font-bold">{topCard.type}</span>
+                {/* <span className="text-2xl font-bold">{topCard.type}</span> */}
                 {topCard.value !== undefined && <span className="text-4xl">{topCard.value}</span>}
-                <span className="text-sm">{topCard.color}</span>
+                {/* <span className="text-sm">{topCard.color}</span> */}
               </>
             ) : (
               <CardComponent color={topCard.color} type={topCard.type} className="w-full h-full" />
@@ -227,13 +226,13 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         </div>
 
         <div className="relative w-full max-w-6xl overflow-x-auto p-4">
-          <h3 className="text-xl font-bold mb-4">Your Hand ({myPlayer?.hand.length}) {myPlayer?.hand.length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
-          <div className="flex flex-wrap justify-center gap-2">
+          <h3 className="text-xl font-bold mb-4 text-center">Your Hand ({myPlayer?.hand.length}) {myPlayer?.hand.length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
+          <div className="flex flex-wrap justify-center gap-0">
             {myPlayer?.hand.map((card: Card) => (
               <div
                 key={card.id}
                 className={cn(
-                  "w-24 h-36 rounded-lg border-2 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer overflow-hidden",
+                  "w-24 h-36 rounded-lg border-2 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-4 transition-transform cursor-pointer overflow-hidden scale-80",
                   card.type === "number"
                     ? [getBgColorClass(card.color), "text-white border-white"]
                     : ["bg-dark border-gray-300", getTextColorClass(card.color)],
@@ -276,6 +275,19 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
             Your Turn!
           </p>
         </div>
+
+        {myPlayer?.isEliminated && (
+          <div className="fixed inset-0 bg-red-900/20 backdrop-blur-[2px] flex flex-col items-center justify-center z-60 pointer-events-auto cursor-not-allowed">
+            <div className="bg-red-600/80 px-8 py-4 rounded-full border-4 border-white shadow-2xl transform -rotate-12">
+              <h1 className="text-6xl font-black text-white uppercase italic">
+                ELIMINATED
+              </h1>
+            </div>
+            <p className="mt-8 text-2xl font-bold text-white drop-shadow-lg bg-black/50 px-4 py-2 rounded">
+              You are spectating the match
+            </p>
+          </div>
+        )}
       </div>
     );
   }
