@@ -25,21 +25,28 @@ export async function startGame(roomId: string) {
     headers: await headers(),
   });
 
-  if (!session) throw new Error("Unauthorized");
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
 
   const foundRoom = await db.query.room.findFirst({
     where: eq(room.id, roomId),
   });
 
-  if (!foundRoom) throw new Error("Room not found");
-  if (foundRoom.hostId !== session.user.id)
-    throw new Error("Only host can start game");
+  if (!foundRoom) {
+    return { error: "Room not found" };
+  }
+  if (foundRoom.hostId !== session.user.id) {
+    return { error: "Only host can start game" };
+  }
 
   const players = await db.query.roomPlayer.findMany({
     where: eq(roomPlayer.roomId, roomId),
   });
 
-  if (players.length < 2) throw new Error("Need at least 2 players");
+  if (players.length < 2) {
+    return { error: "Need at least 2 players" };
+  }
 
   const gameId = nanoid();
   const gameState = initializeGame(
@@ -154,21 +161,32 @@ export async function playCard(
   const db = getDb();
   const auth = getAuth();
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new Error("Unauthorized");
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
 
   const gameState = await getGameState(gameId);
-  if (!gameState) throw new Error("Game not found");
+  if (!gameState) {
+    return { error: "Game not found" };
+  }
 
-  if (gameState.currentTurnUserId !== session.user.id)
-    throw new Error("Not your turn");
+  if (gameState.currentTurnUserId !== session.user.id) {
+    return { error: "Not your turn" };
+  }
 
   const player = gameState.players.find((p) => p.userId === session.user.id);
-  if (!player) throw new Error("Player not found");
+  if (!player) {
+    return { error: "Player not found" };
+  }
 
   const card = player.hand.find((c) => c.id === cardId);
-  if (!card) throw new Error("Card not found in hand");
+  if (!card) {
+    return { error: "Card not found in hand" };
+  }
 
-  if (!canPlayCard(card, gameState)) throw new Error("Invalid move");
+  if (!canPlayCard(card, gameState)) {
+    return { error: "Invalid move" };
+  }
 
   if (gameState.drawPile.length <= 3) {
     reshuffleDiscardPile(gameState);
@@ -235,13 +253,18 @@ export async function drawCard(gameId: string) {
   const auth = getAuth();
   const db = getDb();
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new Error("Unauthorized");
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
 
   const gameState = await getGameState(gameId);
-  if (!gameState) throw new Error("Game not found");
+  if (!gameState) {
+    return { error: "Game not found" };
+  }
 
-  if (gameState.currentTurnUserId !== session.user.id)
-    throw new Error("Not your turn");
+  if (gameState.currentTurnUserId !== session.user.id) {
+    return { error: "Not your turn" };
+  }
 
   const player = gameState.players.find((p) => p.userId === session.user.id)!;
 
@@ -310,16 +333,22 @@ export async function chooseColor(gameId: string, color: Color) {
   const auth = getAuth();
   const db = getDb();
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new Error("Unauthorized");
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
 
   const gameState = await getGameState(gameId);
-  if (!gameState) throw new Error("Game not found");
+  if (!gameState) {
+    return { error: "Game not found" };
+  }
 
-  if (gameState.currentTurnUserId !== session.user.id)
-    throw new Error("Not your turn");
+  if (gameState.currentTurnUserId !== session.user.id) {
+    return { error: "Not your turn" };
+  }
 
-  if (gameState.rouletteStatus !== "pending_color")
-    throw new Error("Not waiting for color choice");
+  if (gameState.rouletteStatus !== "pending_color") {
+    return { error: "Not waiting for color choice" };
+  }
 
   const newState = handleRouletteChoice(gameState, session.user.id, color);
 

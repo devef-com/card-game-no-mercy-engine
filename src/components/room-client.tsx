@@ -42,7 +42,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   // const toastManager = Toast.useToastManager();
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const interval = setTimeout(async () => {
       const state = await getRoomState(room.code);
       if (state) {
         setRoom(state.room);
@@ -141,15 +141,18 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                   <button
                     key={color}
                     className={`w-24 h-24 rounded-lg ${getBgColorClass(color)} hover:opacity-80 transition-opacity`}
-                    onClick={() => {
+                    onClick={async () => {
+                      // TODO wtf with server function of nextjs, this needs to be changed to regular api call
                       if (activeGame.rouletteStatus === "pending_color") {
-                        chooseColor(activeGame.id, color as any).catch((err) => {
-                          toast({ title: "Error choosing color", description: err.message, timeout: 2000 });
-                        });
+                        const res = await chooseColor(activeGame.id, color as any);
+                        if ('error' in (res || {})) {
+                          toast({ title: "Error choosing color", description: res?.error, timeout: 2000 });
+                        }
                       } else if (selectedWildCardId) {
-                        playCard(activeGame.id, selectedWildCardId, color).catch((err) => {
-                          toast({ title: "Error playing card", description: err.message, timeout: 2000, type: "" });
-                        }).finally(() => { console.log("complete") });
+                        const res = await playCard(activeGame.id, selectedWildCardId, color)
+                        if ('error' in (res || {})) {
+                          toast({ title: "Error playing card", description: res?.error, timeout: 2000 });
+                        }
                         setShowColorPicker(false);
                         setSelectedWildCardId(null);
                       }
@@ -174,10 +177,10 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className="flex justify-between w-full max-w-4xl mb-8">
           <div>
-            <h2 className="text-xl font-bold">Room: {room.code}</h2>
+            <h2 className="text-xs font-bold">{room.code}</h2>
             <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
-            <p>Current Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor)}`}>{activeGame.currentColor.toUpperCase()}</span></p>
-            {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-2xl animate-pulse">Penalty: +{activeGame.stackedPenalty}</p>}
+            <p>Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor)}`}>{activeGame.currentColor.toUpperCase()}</span></p>
+            {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-2xl animate-pulse">Acumulado: +{activeGame.stackedPenalty}</p>}
           </div>
           <div>
             <h3 className="font-bold">Players:</h3>
@@ -236,15 +239,16 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                     : ["bg-dark border-gray-300", getTextColorClass(card.color)],
                   isMyTurn ? "hover:border-yellow-400" : "opacity-80"
                 )}
-                onClick={() => {
+                onClick={async () => {
                   if (isMyTurn) {
                     if (card.color === "wild" && card.type !== "wild_color_roulette") {
                       setSelectedWildCardId(card.id);
                       setShowColorPicker(true);
                     } else {
-                      playCard(activeGame.id, card.id).catch((err) => {
-                        toast({ title: "Error playing card", description: err.message });
-                      });
+                      const res = await playCard(activeGame.id, card.id)
+                      if ('error' in (res || {})) {
+                        toast({ title: "Error playing card", description: res?.error, timeout: 1000 });
+                      }
                     }
                   }
                 }}

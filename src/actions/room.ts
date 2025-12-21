@@ -16,7 +16,7 @@ export async function createRoom() {
   });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const code = nanoid(6).toUpperCase();
@@ -45,7 +45,7 @@ export async function joinRoom(code: string) {
   });
 
   if (!session) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const foundRoom = await db.query.room.findFirst({
@@ -53,7 +53,7 @@ export async function joinRoom(code: string) {
   });
 
   if (!foundRoom) {
-    throw new Error("Room not found");
+    return { error: "Room not found" };
   }
 
   // Check if already joined
