@@ -277,10 +277,10 @@ export function applyCardEffect(
     case "wild_reverse_draw4":
       newState.stackedPenalty += 4;
       // disabled as my girlfriend didnt like to lose :c
-      // newState.direction *= -1;
-      // if (newState.players.filter((p) => !p.isEliminated).length === 2) {
-      //   skip = 1;
-      // }
+      newState.direction *= -1;
+      if (newState.players.filter((p) => !p.isEliminated).length === 2) {
+        skip = 1;
+      }
       break;
     case "draw6":
       newState.stackedPenalty += 6;
