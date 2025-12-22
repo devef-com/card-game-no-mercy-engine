@@ -30,10 +30,12 @@ interface RoomClientProps {
   players: User[];
 }
 
+type GameState = NonNullable<Awaited<ReturnType<typeof getRoomState>>>;
+
 export function RoomClient({ room: initialRoom, currentUser, players: initialPlayers }: RoomClientProps) {
   const [room, setRoom] = useState(initialRoom);
   const [players, setPlayers] = useState(initialPlayers);
-  const [activeGame, setActiveGame] = useState<any>(null);
+  const [activeGame, setActiveGame] = useState<GameState['activeGame'] | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedWildCardId, setSelectedWildCardId] = useState<string | null>(null);
   const [showFlash, setShowFlash] = useState(false);
@@ -107,8 +109,10 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   }
 
   if (room.status === "playing" && activeGame) {
-    const myPlayer = activeGame.players.find((p: any) => p.userId === currentUser.id);
+    type Player = Omit<typeof activeGame.players[number], 'hand'> & { hand: Card[] };
+    const myPlayer = activeGame.players.find((p) => p.userId === currentUser.id) as Player | undefined;
     const isMyTurn = activeGame.currentTurnUserId === currentUser.id;
+    //@ts-ignore TODO as discardPile its json, we have the missing type info
     const topCard = activeGame.discardPile[activeGame.discardPile.length - 1];
 
     // Force update if roulette status is pending and it's my turn
@@ -118,7 +122,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
     const { drawPile, ...more } = activeGame;
     return (
-      <div className="flex flex-col items-center min-h-screen bg-black p-4 text-white relative">
+      <div className="flex flex-col items-center min-h-svh bg-black p-4 text-white relative">
         <details>
           <pre className="text-xs">{JSON.stringify(more, null, 2)}</pre>
         </details>
@@ -171,7 +175,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           <div>
             <h2 className="text-xs font-bold">{room.code}</h2>
             <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
-            <p>Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor)}`}>{activeGame.currentColor.toUpperCase()}</span></p>
+            <p>Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor || 'wild')}`}>{activeGame.currentColor?.toUpperCase()}</span></p>
             {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-2xl animate-pulse">Acumulado: +{activeGame.stackedPenalty}</p>}
           </div>
           <div>
@@ -191,7 +195,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className={cn(
           "text-2xl font-extrabold mb-4 animate-bounce",
-          isMyTurn ? `block ${getTextColorClass(activeGame.currentColor)}` : "hidden text-white"
+          isMyTurn ? `block ${getTextColorClass(activeGame.currentColor || 'wild')}` : "hidden text-white"
         )}>
           Tu turno
         </div>
@@ -226,8 +230,16 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         </div>
 
         <div className="relative w-full max-w-6xl overflow-x-auto p-4">
-          <h3 className="text-xl font-bold mb-4 text-center">Your Hand ({myPlayer?.hand.length}) {myPlayer?.hand.length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
-          <div className="flex flex-wrap justify-center gap-0">
+          <h3 className="text-xl font-bold mb-4 text-center">Your Hand ({myPlayer?.hand.length}) {(myPlayer?.hand ?? []).length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
+          <div className={cn("flex flex-wrap justify-center gap-0 rounded-sm")} style={{
+            backgroundColor: {
+              'blue': 'rgba(0, 0, 255, 0.4)',
+              'red': 'rgba(255, 0, 0, 0.4)',
+              'green': 'rgba(0, 255, 0, 0.4)',
+              'yellow': 'rgba(255, 255, 0, 0.4)',
+              'wild': 'rgba(139, 92, 246, 0.4)',
+            }[activeGame.currentColor as string]
+          }}>
             {myPlayer?.hand.map((card: Card) => (
               <div
                 key={card.id}
@@ -253,7 +265,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                 }}
               >
                 {card.type === 'number' ? (
-                  <span className="text-lg font-bold text-center">{card.value}</span>
+                  <span className="text-2xl font-bold text-center">{card.value}</span>
                 ) : (
                   <CardComponent color={card.color} type={card.type} className="w-full h-full" />
                 )}
@@ -330,7 +342,7 @@ const TEXT_COLORS: Record<string, string> = {
   green: "text-green-600",
   yellow: "text-yellow-600",
   wild: "text-purple-600",
-};
+} as const;
 
 function getTextColorClass(color: string) {
   if (color === "wild") return "text-purple-600";
