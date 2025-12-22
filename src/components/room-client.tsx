@@ -173,6 +173,9 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className="flex justify-between w-full max-w-4xl mb-4">
           <div>
+            {/* <pre className="text-xs">
+              {JSON.stringify(topCard, null, 2)}
+            </pre> */}
             <h2 className="text-xs font-bold">{room.code}</h2>
             <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
             <p>Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor || 'wild')}`}>{activeGame.currentColor?.toUpperCase()}</span></p>
@@ -203,12 +206,13 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
         <div className="flex gap-8 items-center mb-6">
           <div
             className={cn(
-              "w-25 h-37 bg-blue-900 rounded-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-blue-800",
+              "w-25 h-37 bg-blue-900 rounded-lg border-2 border-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-800",
               isMyTurn && "ring-4 ring-yellow-400"
             )}
             onClick={() => isMyTurn && drawCard(activeGame.id)}
           >
-            <span className="font-bold">Draw Pile</span>
+            <p className="font-bold">Draw Pile</p>
+            <p className="text-xs font-extralight">{(activeGame.drawPile as Array<any>).length} cards</p>
           </div>
 
           <div className={cn(
@@ -231,15 +235,17 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className="relative w-full max-w-6xl overflow-x-auto p-4">
           <h3 className="text-xl font-bold mb-4 text-center">Your Hand ({myPlayer?.hand.length}) {(myPlayer?.hand ?? []).length >= 20 && <span className="text-red-500 animate-pulse">DANGER!</span>}</h3>
-          <div className={cn("flex flex-wrap justify-center gap-0 rounded-sm")} style={{
-            backgroundColor: {
-              'blue': 'rgba(0, 0, 255, 0.4)',
-              'red': 'rgba(255, 0, 0, 0.4)',
-              'green': 'rgba(0, 255, 0, 0.4)',
-              'yellow': 'rgba(255, 255, 0, 0.4)',
-              'wild': 'rgba(139, 92, 246, 0.4)',
-            }[activeGame.currentColor as string]
-          }}>
+          <div className={cn("flex flex-wrap justify-center gap-0 rounded-sm")}
+          // style={{
+          //   backgroundColor: {
+          //     'blue': 'rgba(0, 0, 255, 0.4)',
+          //     'red': 'rgba(255, 0, 0, 0.4)',
+          //     'green': 'rgba(0, 255, 0, 0.4)',
+          //     'yellow': 'rgba(255, 255, 0, 0.4)',
+          //     'wild': 'rgba(139, 92, 246, 0.4)',
+          //   }[activeGame.currentColor as string]
+          // }}
+          >
             {myPlayer?.hand.map((card: Card) => (
               <div
                 key={card.id}
@@ -288,14 +294,34 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </p>
         </div>
 
+        <div className={cn("fixed top-4 left-4 rounded-lg p-3 text-sm text-white border border-white/30", getBgColorClassBlur(activeGame.currentColor || 'wild'), ' backdrop-blur-md w-6 h-9')}>
+
+        </div>
+
+        <div className={cn(
+          'fixed bottom-10 left-4 rounded-lg',
+          topCard.type === 'number' ? getBgColorClassBlur(topCard.color || 'wild') : '',
+          'backdrop-blur-[1px] aspect-[0.7] flex items-center justify-center'
+        )}>
+          {topCard.type != 'number' ? (
+            <figure className="w-12 h-18 m-1 rounded-sm border border-white/30">
+              <CardComponent color={topCard.color} type={topCard.type} className="w-full h-full" />
+            </figure>
+          ) : (
+            <span className="text-xl font-bold text-white mx-4 my-2">
+              {topCard.type == 'number' ? topCard.value : '..'}
+            </span>
+          )}
+        </div>
+
         {myPlayer?.isEliminated && (
-          <div className="fixed inset-0 bg-red-900/20 backdrop-blur-[2px] flex flex-col items-center justify-center z-60 pointer-events-auto cursor-not-allowed">
+          <div className="fixed inset-0 bg-red-900/20 backdrop-blur-[0px] flex flex-col items-center justify-end z-60 pointer-events-auto cursor-not-allowed">
             <div className="bg-red-600/80 px-8 py-4 rounded-full border-4 border-white shadow-2xl transform -rotate-12">
-              <h1 className="text-6xl font-black text-white uppercase italic">
+              <h1 className="text-2xl font-black text-white uppercase italic select-none">
                 ELIMINATED
               </h1>
             </div>
-            <p className="mt-8 text-2xl font-bold text-white drop-shadow-lg bg-black/50 px-4 py-2 rounded">
+            <p className="mt-8 text-2xl font-bold text-white drop-shadow-lg bg-black/50 px-4 py-2 rounded mb-4 select-none">
               You are spectating the match
             </p>
           </div>
@@ -352,4 +378,16 @@ function getTextColorClass(color: string) {
 function getBgColorClass(color: string) {
   if (color === "wild") return "bg-purple-600";
   return BG_COLORS[color] || "bg-gray-800";
+}
+
+function getBgColorClassBlur(color: string) {
+  if (color === "wild") return "bg-purple-600";
+  const colors: Record<string, string> = {
+    red: "bg-red-600/90",
+    blue: "bg-blue-600/90",
+    green: "bg-green-600/90",
+    yellow: "bg-yellow-400/90",
+    wild: "bg-purple-600/90",
+  }
+  return colors[color] || "bg-gray-800/90";
 }
