@@ -15,6 +15,7 @@ import {
   handleRouletteChoice,
   Color,
   reshuffleDiscardPile,
+  shuffle,
 } from "@/src/lib/game-logic";
 import { nanoid } from "nanoid";
 
@@ -48,12 +49,11 @@ export async function startGame(roomId: string) {
     return { error: "Need at least 2 players" };
   }
 
+  // Shuffle player positions randomly
+  const shuffledUserIds = shuffle(players.map((p) => p.userId));
+
   const gameId = nanoid();
-  const gameState = initializeGame(
-    gameId,
-    roomId,
-    players.map((p) => p.userId)
-  );
+  const gameState = initializeGame(gameId, roomId, shuffledUserIds);
 
   // Transaction would be better, but Drizzle SQLite transaction support depends on driver.
   // I'll do sequential inserts.
@@ -291,6 +291,11 @@ export async function drawCard(gameId: string) {
   // Mercy Rule Check
   if (player.hand.length >= 25) {
     player.isEliminated = true;
+    
+    // Move eliminated player's cards to the end of the discard pile
+    gameState.discardPile.push(...player.hand);
+    player.hand = [];
+    
     // Log elimination
     await db.insert(gameMove).values({
       id: nanoid(),
@@ -355,6 +360,10 @@ export async function chooseColor(gameId: string, color: Color) {
   // Check for elimination (Mercy Rule)
   const player = newState.players.find((p) => p.userId === session.user.id);
   if (player?.isEliminated) {
+    // Move eliminated player's cards to the end of the discard pile
+    newState.discardPile.push(...player.hand);
+    player.hand = [];
+    
     await db.insert(gameMove).values({
       id: nanoid(),
       gameId,
