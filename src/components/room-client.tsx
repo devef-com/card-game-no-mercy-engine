@@ -173,63 +173,128 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
 
         <div className="flex justify-between w-full max-w-4xl mb-4">
           <div>
-            {/* <pre className="text-xs">
-              {JSON.stringify(topCard, null, 2)}
-            </pre> */}
-            <h2 className="text-xs font-bold">{room.code}</h2>
-            <p>Direction: {activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
-            <p>Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor || 'wild')}`}>{activeGame.currentColor?.toUpperCase()}</span></p>
-            {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-2xl animate-pulse">Acumulado: +{activeGame.stackedPenalty}</p>}
+            <h2 className="text-xs font-bold opacity-50">{room.code}</h2>
+            <p className="text-sm">Color: <span className={`font-bold ${getTextColorClass(activeGame.currentColor || 'wild')}`}>{activeGame.currentColor?.toUpperCase()}</span></p>
+            {activeGame.stackedPenalty > 0 && <p className="text-red-500 font-bold text-xl animate-pulse">+{activeGame.stackedPenalty}</p>}
           </div>
-          <div>
-            <h3 className="font-bold">Players:</h3>
-            {activeGame.players.map((p: any) => {
-              const user = players.find(u => u.id === p.userId);
-              return (
-                <div key={p.userId} className={cn("flex items-center gap-2", activeGame.currentTurnUserId === p.userId && "text-yellow-300 font-bold")}>
-                  <span>{user?.name}</span>
-                  <span>({p.cardCount} cards)</span>
-                  {p.isEliminated && <span className="text-red-500">(Eliminated)</span>}
-                </div>
-              );
-            })}
+          <div className="text-right">
+            <p className="text-sm opacity-70">{activeGame.direction === 1 ? "Clockwise" : "Counter-Clockwise"}</p>
           </div>
         </div>
 
         <div className={cn(
-          "text-2xl font-extrabold mb-4 animate-bounce",
+          "text-2xl font-extrabold mb-4 animate-bounce z-30",
           isMyTurn ? `block ${getTextColorClass(activeGame.currentColor || 'wild')}` : "hidden text-white"
         )}>
           Tu turno
         </div>
 
-        <div className="flex gap-8 items-center mb-6">
-          <div
-            className={cn(
-              "w-25 h-37 bg-blue-900 rounded-lg border-2 border-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-800",
-              isMyTurn && "ring-4 ring-yellow-400"
-            )}
-            onClick={() => isMyTurn && drawCard(activeGame.id)}
-          >
-            <p className="font-bold">Draw Pile</p>
-            <p className="text-xs font-extralight">{(activeGame.drawPile as Array<any>).length} cards</p>
-          </div>
+        <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center mb-8 mt-4">
+          {/* Direction Arrows SVG */}
+          <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+            <defs>
+              <marker id="arrowhead" markerWidth="3" markerHeight="2" refX="2.5" refY="1" orient="auto" markerUnits="userSpaceOnUse">
+                <polygon points="0 0, 3 1, 0 2" fill="currentColor" />
+              </marker>
+              <marker id="arrowhead-active" markerWidth="5" markerHeight="3.5" refX="4" refY="1.75" orient="auto" markerUnits="userSpaceOnUse">
+                <polygon points="0 0, 5 1.75, 0 3.5" fill="currentColor" />
+              </marker>
+            </defs>
+            {activeGame.players.map((p: any, i: number) => {
+              const playerCount = activeGame.players.length;
+              const nextIndex = (i + activeGame.direction + playerCount) % playerCount;
 
-          <div className={cn(
-            "w-25 h-37 rounded-lg border-2 flex flex-col items-center justify-center overflow-hidden scale-94",
-            topCard.type === "number"
-              ? [getBgColorClass(topCard.color), "text-white border-white"]
-              : ["bg-white border-gray-300", getTextColorClass(topCard.color)]
-          )}>
-            {topCard.type === "number" ? (
-              <>
-                {/* <span className="text-2xl font-bold">{topCard.type}</span> */}
-                {topCard.value !== undefined && <span className="text-4xl">{topCard.value}</span>}
-                {/* <span className="text-sm">{topCard.color}</span> */}
-              </>
-            ) : (
-              <CardComponent color={topCard.color} type={topCard.type} className="w-full h-full" />
-            )}
+              const radius = 32; // Slightly inside the players
+              const angle1 = (i / playerCount) * 2 * Math.PI - Math.PI / 2;
+              const angle2 = (nextIndex / playerCount) * 2 * Math.PI - Math.PI / 2;
+
+              // Offset the start and end points to create a gap between arrows
+              const offset = 0.25;
+              const x1 = 50 + radius * Math.cos(angle1 + (activeGame.direction * offset));
+              const y1 = 50 + radius * Math.sin(angle1 + (activeGame.direction * offset));
+              const x2 = 50 + radius * Math.cos(angle2 - (activeGame.direction * offset));
+              const y2 = 50 + radius * Math.sin(angle2 - (activeGame.direction * offset));
+
+              const isCurrentPath = activeGame.currentTurnUserId === p.userId;
+
+              return (
+                <path
+                  key={`arrow-${i}`}
+                  d={`M ${x1} ${y1} A ${radius} ${radius} 0 0 ${activeGame.direction === 1 ? 1 : 0} ${x2} ${y2}`}
+                  stroke="currentColor"
+                  strokeWidth={isCurrentPath ? "1" : "0.7"}
+                  fill="none"
+                  markerEnd={isCurrentPath ? "url(#arrowhead-active)" : "url(#arrowhead)"}
+                  className={cn(
+                    "transition-all duration-500",
+                    isCurrentPath ? "text-yellow-400 animate-pulse" : "text-white/20"
+                  )}
+                />
+              );
+            })}
+          </svg>
+
+          {/* Players */}
+          {activeGame.players.map((p: any, i: number) => {
+            const playerCount = activeGame.players.length;
+            const angle = (i / playerCount) * 2 * Math.PI - Math.PI / 2;
+            const radius = 42; // %
+            const x = 50 + radius * Math.cos(angle);
+            const y = 50 + radius * Math.sin(angle);
+            const user = players.find(u => u.id === p.userId);
+            const isCurrent = activeGame.currentTurnUserId === p.userId;
+
+            return (
+              <div
+                key={p.userId}
+                className={cn(
+                  "absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-500 z-20",
+                  isCurrent ? "scale-110" : "scale-100"
+                )}
+                style={{ left: `${x}%`, top: `${y}%` }}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold border-2",
+                  isCurrent ? "bg-yellow-400 border-white text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]" : "bg-zinc-800 border-zinc-600 text-white",
+                  p.isEliminated && "opacity-50 grayscale"
+                )}>
+                  {user?.name[0].toUpperCase()}
+                </div>
+                <div className="mt-1 text-center bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm">
+                  <p className={cn("text-xs font-bold truncate max-w-20", isCurrent ? "text-yellow-400" : "text-white", p.isEliminated && "text-red-600 line-through font-extrabold")}>
+                    {user?.name}
+                  </p>
+                  <p className="text-[10px] opacity-70">{p.cardCount} cards</p>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Center Piles */}
+          <div className="flex gap-4 scale-90 sm:scale-100 z-10">
+            <div
+              className={cn(
+                "w-20 h-28 sm:w-25 sm:h-37 bg-blue-900 rounded-lg border-2 border-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-800 transition-all",
+                isMyTurn && "ring-4 ring-yellow-400"
+              )}
+              onClick={() => isMyTurn && drawCard(activeGame.id)}
+            >
+              <p className="font-bold text-xs sm:text-base">Draw</p>
+              <p className="text-[10px] sm:text-xs font-extralight">{(activeGame.drawPile as Array<any>).length}</p>
+            </div>
+
+            <div className={cn(
+              "w-20 h-28 sm:w-25 sm:h-37 rounded-lg border-2 flex flex-col items-center justify-center overflow-hidden transition-all",
+              topCard.type === "number"
+                ? [getBgColorClass(topCard.color), "text-white border-white"]
+                : ["bg-white border-gray-300", getTextColorClass(topCard.color)]
+            )}>
+              {topCard.type === "number" ? (
+                <span className="text-3xl sm:text-4xl font-bold">{topCard.value}</span>
+              ) : (
+                <CardComponent color={topCard.color} type={topCard.type} className="w-full h-full" />
+              )}
+            </div>
           </div>
         </div>
 

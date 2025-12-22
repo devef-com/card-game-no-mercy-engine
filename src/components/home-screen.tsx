@@ -131,7 +131,7 @@ export function HomeScreen() {
         <div>
           <h3 className="text-lg font-bold">Your Rooms</h3>
           <ul className="mt-2 space-y-2">
-            {UserRooms && UserRooms.rooms.length > 0 ? (
+            {UserRooms && UserRooms?.rooms?.length > 0 ? (
               UserRooms.rooms.map((room) => (
                 <li key={room.id} className="p-2 border rounded hover:bg-gray-100">
                   <Link href={`/room/${room.code}`} className="font-medium">
