@@ -192,6 +192,14 @@ export async function playCard(
     reshuffleDiscardPile(gameState);
   }
 
+  if (player.hand.length === 1 && player.hand.at(0)?.type != "number") {
+    // Player is about to go out with a special card, must play a number card if possible
+    // dont allow to play with wild card if they have just one card, they must draw from pile
+    return {
+      error: "Must play a number card when going out, take from the pile",
+    };
+  }
+
   // Find identical number cards to discard together
   const duplicatedCards =
     card.type === "number"
@@ -291,11 +299,11 @@ export async function drawCard(gameId: string) {
   // Mercy Rule Check
   if (player.hand.length >= 25) {
     player.isEliminated = true;
-    
+
     // Move eliminated player's cards to the end of the discard pile
     gameState.discardPile.push(...player.hand);
     player.hand = [];
-    
+
     // Log elimination
     await db.insert(gameMove).values({
       id: nanoid(),
@@ -363,7 +371,7 @@ export async function chooseColor(gameId: string, color: Color) {
     // Move eliminated player's cards to the end of the discard pile
     newState.discardPile.push(...player.hand);
     player.hand = [];
-    
+
     await db.insert(gameMove).values({
       id: nanoid(),
       gameId,
