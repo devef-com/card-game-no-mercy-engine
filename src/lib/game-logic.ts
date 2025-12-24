@@ -43,7 +43,7 @@ export interface GameState {
 
 export const COLORS: Color[] = ["red", "blue", "green", "yellow"];
 
-export function generateDeck(): Card[] {
+export function generateDeck(playerCount: number): Card[] {
   const deck: Card[] = [];
   const addCard = (
     color: Color,
@@ -85,6 +85,35 @@ export function generateDeck(): Card[] {
   addCard("wild", "draw10", undefined, 4);
   addCard("wild", "wild_reverse_draw4", undefined, 8);
 
+  if (playerCount > 6) {
+    // For larger games, add an extra set of cards
+    const amount = Math.floor((playerCount - 6) / 2) + 1;
+    for (let i = 0; i < amount; i++) {
+      COLORS.forEach((color) => {
+        if (color === "wild") return;
+
+        // Numbers 0-9 (1 of each)
+        for (let n = 0; n <= 9; n++) {
+          addCard(color, "number", n, 1);
+        }
+
+        // Action cards
+        addCard(color, "discard_all", undefined, 1);
+        addCard(color, "draw2", undefined, 1);
+        addCard(color, "draw4", undefined, 1);
+        addCard(color, "reverse", undefined, 1);
+        addCard(color, "skip", undefined, 1);
+        addCard(color, "skip_everyone", undefined, 1);
+      });
+
+      // Wilds
+      addCard("wild", "wild_color_roulette", undefined, 2);
+      addCard("wild", "draw6", undefined, 1);
+      addCard("wild", "draw10", undefined, 1);
+      addCard("wild", "wild_reverse_draw4", undefined, 2);
+    }
+  }
+
   return shuffle(deck);
 }
 
@@ -114,13 +143,14 @@ export function initializeGame(
   roomId: string,
   userIds: string[]
 ): GameState {
-  const deck = generateDeck();
   const players: PlayerState[] = userIds.map((userId) => ({
     userId,
     hand: [],
     isEliminated: false,
     score: 0,
   }));
+
+  const deck = generateDeck(players.length);
 
   // Deal 7 cards to each player
   players.forEach((player) => {
