@@ -396,18 +396,93 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
   }
 
   if (room.status === "finished") {
+    // Sort players by rank: winner first, then by card count (fewer is better), eliminated last
+    const sortedPlayers = activeGame?.players 
+      ? [...activeGame.players].sort((a, b) => {
+          // Winner always first
+          if (a.userId === activeGame.winnerId) return -1;
+          if (b.userId === activeGame.winnerId) return 1;
+          
+          // Eliminated players last
+          if (a.isEliminated && !b.isEliminated) return 1;
+          if (!a.isEliminated && b.isEliminated) return -1;
+          
+          // If both eliminated or both not, sort by card count
+          return a.cardCount - b.cardCount;
+        })
+      : [];
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black">
-        <h1 className="text-4xl font-bold mb-4">Game Over!</h1>
-        {activeGame?.winnerId && (
-          <h2 className="text-2xl text-green-600">Winner: {players.find(p => p.id === activeGame.winnerId)?.name}</h2>
-        )}
-        <button
-          className="mt-8 px-6 py-3 bg-blue-600 text-white rounded-lg"
-          onClick={() => router.push("/")}
-        >
-          Back to Home
-        </button>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black p-4">
+        <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-lg shadow-xl p-8">
+          <h1 className="text-4xl font-bold text-center mb-8">🎉 Game Over! 🎉</h1>
+          
+          {activeGame?.winnerId && (
+            <div className="text-center mb-8 p-6 bg-green-100 dark:bg-green-900/30 rounded-lg border-2 border-green-500">
+              <h2 className="text-3xl font-bold text-green-600 dark:text-green-400">
+                👑 {players.find(p => p.id === activeGame.winnerId)?.name} Won!
+              </h2>
+            </div>
+          )}
+
+          {sortedPlayers.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold mb-4 text-center">Final Rankings</h3>
+              <div className="space-y-3">
+                {sortedPlayers.map((player, index) => {
+                  const user = players.find(u => u.id === player.userId);
+                  const isWinner = player.userId === activeGame?.winnerId;
+                  const position = index + 1;
+                  
+                  return (
+                    <div 
+                      key={player.userId}
+                      className={cn(
+                        "flex items-center justify-between p-4 rounded-lg",
+                        isWinner 
+                          ? "bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-500"
+                          : player.isEliminated
+                          ? "bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700"
+                          : "bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
+                          isWinner ? "bg-yellow-500 text-white" : "bg-gray-300 dark:bg-zinc-700 text-gray-700 dark:text-gray-300"
+                        )}>
+                          {position}
+                        </div>
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {(user?.name && user.name[0]?.toUpperCase()) || '?'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-lg">{user?.name || 'Unknown Player'}</p>
+                          {player.isEliminated && (
+                            <span className="text-xs text-red-600 dark:text-red-400 font-semibold">
+                              Eliminated (Mercy Rule)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Cards Left</p>
+                        <p className="text-2xl font-bold">{player.cardCount}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <button
+            className="w-full py-4 bg-blue-600 text-white rounded-lg text-xl font-bold hover:bg-blue-700 transition-colors"
+            onClick={() => router.push("/")}
+          >
+            Back to Home
+          </button>
+        </div>
       </div>
     );
   }
