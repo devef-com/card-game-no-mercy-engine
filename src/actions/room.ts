@@ -81,10 +81,14 @@ export async function getRoomState(code: string) {
     with: {
       host: true,
       games: {
-        where: eq(game.status, "active"),
         with: {
-          players: true,
+          players: {
+            with: {
+              user: true,
+            },
+          },
         },
+        orderBy: (games, { desc }) => [desc(games.createdAt)],
         limit: 1,
       },
     },
