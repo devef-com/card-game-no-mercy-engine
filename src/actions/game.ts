@@ -324,12 +324,19 @@ export async function drawCard(gameId: string) {
     }
   }
 
-  // Advance turn
-  gameState.currentTurnUserId = getNextPlayer(
-    gameState.currentTurnUserId,
-    gameState.players,
-    gameState.direction
+  // Check if any drawn card is playable
+  const hasPlayableCard = drawnCards.some((card) =>
+    canPlayCard(card, gameState)
   );
+
+  // Only advance turn if no playable card was drawn or player was eliminated
+  if (!hasPlayableCard || player.isEliminated) {
+    gameState.currentTurnUserId = getNextPlayer(
+      gameState.currentTurnUserId,
+      gameState.players,
+      gameState.direction
+    );
+  }
 
   await saveGameState(gameState);
 
