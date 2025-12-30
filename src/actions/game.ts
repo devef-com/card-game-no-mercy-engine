@@ -329,8 +329,8 @@ export async function drawCard(gameId: string) {
     canPlayCard(card, gameState)
   );
 
-  // Only advance turn if no playable card was drawn
-  if (!hasPlayableCard) {
+  // Only advance turn if no playable card was drawn or player was eliminated
+  if (!hasPlayableCard || player.isEliminated) {
     gameState.currentTurnUserId = getNextPlayer(
       gameState.currentTurnUserId,
       gameState.players,
