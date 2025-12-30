@@ -82,11 +82,7 @@ export async function getRoomState(code: string) {
       host: true,
       games: {
         with: {
-          players: {
-            with: {
-              user: true,
-            },
-          },
+          players: true,
         },
         orderBy: (games, { desc }) => [desc(games.createdAt)],
         limit: 1,

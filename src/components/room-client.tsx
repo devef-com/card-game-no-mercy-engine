@@ -454,10 +454,10 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                           {position}
                         </div>
                         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {user?.name?.[0]?.toUpperCase() || '?'}
+                          {(user?.name && user.name[0]?.toUpperCase()) || '?'}
                         </div>
                         <div>
-                          <p className="font-bold text-lg">{user?.name}</p>
+                          <p className="font-bold text-lg">{user?.name || 'Unknown Player'}</p>
                           {player.isEliminated && (
                             <span className="text-xs text-red-600 dark:text-red-400 font-semibold">
                               Eliminated (Mercy Rule)
