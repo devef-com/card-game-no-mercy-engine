@@ -197,7 +197,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
               toast({ title: "Error passing turn", description: res?.error, timeout: 1500 });
             }
           }} className="bg-white p-2 rounded-full inline-flex items-center text-sm text-center text-black font-bold mb-2 animate-pulse cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="scale-75 lucide lucide-arrow-right-icon lucide-arrow-right"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="scale-75 lucide lucide-arrow-right-icon lucide-arrow-right"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             <span>Next player</span>
           </button>
         </div>
@@ -248,7 +248,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
           </svg>
 
           {/* Players */}
-          {activeGame.players.map((p: any, i: number) => {
+          {activeGame.players.map((p, i: number) => {
             const playerCount = activeGame.players.length;
             const angle = (i / playerCount) * 2 * Math.PI - Math.PI / 2;
             const radius = 42; // %
@@ -277,7 +277,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                   <p className={cn("text-xs font-bold truncate max-w-20", isCurrent ? "text-yellow-400" : "text-white", p.isEliminated && "text-red-600 line-through font-extrabold")}>
                     {user?.name}
                   </p>
-                  <p className="text-[10px] opacity-70">{p.cardCount} cards</p>
+                  <p className="text-[10px] opacity-70">{p.isEliminated ? p.cardCountAtEliminated : p.cardCount} cards</p>
                 </div>
               </div>
             );
@@ -490,7 +490,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600 dark:text-gray-400">Cards Left</p>
-                        <p className="text-2xl font-bold">{player.cardCountAtEliminated}</p>
+                        <p className="text-2xl font-bold">{player.isEliminated ? player.cardCountAtEliminated : player.cardCount}</p>
                       </div>
                     </div>
                   );

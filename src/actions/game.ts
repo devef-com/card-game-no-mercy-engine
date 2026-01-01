@@ -146,6 +146,7 @@ async function saveGameState(state: GameState) {
         cardCount: player.hand.length,
         isEliminated: player.isEliminated,
         score: player.score,
+        cardCountAtEliminated: player.cardCountAtEliminated || 0,
       })
       .where(
         and(
