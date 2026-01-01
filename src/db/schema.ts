@@ -153,6 +153,9 @@ export const game = sqliteTable("game", {
   currentColor: text("current_color"), // For wild cards
   stackedPenalty: integer("stacked_penalty").default(0).notNull(),
   rouletteStatus: text("roulette_status"), // pending_color, drawing
+  showNextPlayerAction: integer("show_next_player_action", { mode: "boolean" })
+    .default(false)
+    .notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),

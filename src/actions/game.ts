@@ -115,6 +115,7 @@ async function getGameState(gameId: string): Promise<GameState | null> {
     stackedPenalty: gameRecord.stackedPenalty,
     winnerId: gameRecord.winnerId || undefined,
     rouletteStatus: gameRecord.rouletteStatus as any,
+    showNextPlayerAction: Boolean(gameRecord.showNextPlayerAction),
   };
 }
 
@@ -132,6 +133,7 @@ async function saveGameState(state: GameState) {
       stackedPenalty: state.stackedPenalty,
       winnerId: state.winnerId,
       rouletteStatus: state.rouletteStatus || null,
+      showNextPlayerAction: state.showNextPlayerAction || false,
     })
     .where(eq(game.id, state.id));
 
@@ -199,6 +201,8 @@ export async function playCard(
       error: "Must play a number card when going out, take from the pile",
     };
   }
+
+  gameState.showNextPlayerAction = false;
 
   // Find identical number cards to discard together
   const duplicatedCards =
@@ -274,6 +278,10 @@ export async function drawCard(gameId: string) {
     return { error: "Not your turn" };
   }
 
+  console.log("showNextPlayerAction:", gameState.showNextPlayerAction);
+  if (gameState.showNextPlayerAction) {
+    return { error: "You have a playable card, cannot draw." };
+  }
   const player = gameState.players.find((p) => p.userId === session.user.id)!;
 
   // Calculate cards to draw
@@ -295,6 +303,7 @@ export async function drawCard(gameId: string) {
   }
 
   player.hand.push(...drawnCards);
+  gameState.showNextPlayerAction = false;
 
   // Mercy Rule Check
   if (player.hand.length >= 25) {
@@ -324,12 +333,28 @@ export async function drawCard(gameId: string) {
     }
   }
 
-  // Advance turn
-  gameState.currentTurnUserId = getNextPlayer(
-    gameState.currentTurnUserId,
-    gameState.players,
-    gameState.direction
+  const hasPlayableCard = player.hand.some((card) =>
+    canPlayCard(card, gameState)
   );
+
+  // Only advance turn if no playable card was drawn or player was eliminated
+  if (!hasPlayableCard || player.isEliminated) {
+    console.log("Advancing turn to next player");
+    gameState.currentTurnUserId = getNextPlayer(
+      gameState.currentTurnUserId,
+      gameState.players,
+      gameState.direction
+    );
+  } else {
+    console.log("Player has a playable card, must play it");
+    gameState.showNextPlayerAction = true;
+  }
+  // // Advance turn
+  // gameState.currentTurnUserId = getNextPlayer(
+  //   gameState.currentTurnUserId,
+  //   gameState.players,
+  //   gameState.direction
+  // );
 
   await saveGameState(gameState);
 
@@ -398,5 +423,50 @@ export async function chooseColor(gameId: string, color: Color) {
     userId: session.user.id,
     action: "CHOOSE_COLOR",
     metadata: { color },
+  });
+}
+
+export async function passTurn(gameId: string) {
+  const auth = getAuth();
+  const db = getDb();
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
+  const gameState = await getGameState(gameId);
+  if (!gameState) {
+    return { error: "Game not found" };
+  }
+
+  if (gameState.currentTurnUserId !== session.user.id) {
+    return { error: "Not your turn" };
+  }
+
+  const player = gameState.players.find((p) => p.userId === session.user.id)!;
+
+  if (player.hand.length === 0) {
+    return { error: "Cannot pass turn with no cards" };
+  }
+
+  // if (gameState.showNextPlayerAction) {
+  //   return { error: "You have a playable card, cannot pass." };
+  // }
+
+  // Advance turn
+  gameState.currentTurnUserId = getNextPlayer(
+    gameState.currentTurnUserId,
+    gameState.players,
+    gameState.direction
+  );
+  gameState.showNextPlayerAction = false;
+
+  await saveGameState(gameState);
+
+  await db.insert(gameMove).values({
+    id: nanoid(),
+    gameId,
+    userId: session.user.id,
+    action: "PASS",
   });
 }

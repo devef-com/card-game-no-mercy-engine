@@ -74,17 +74,18 @@ export async function joinRoom(code: string) {
   redirect(`/room/${code}`);
 }
 
-export async function getRoomState(code: string) {
+export async function getRoomState(code: string, activeGameOnly = false) {
   const db = getDb();
   const foundRoom = await db.query.room.findFirst({
     where: eq(room.code, code),
     with: {
       host: true,
       games: {
-        where: eq(game.status, "active"),
+        // where: eq(game.status, "active"),
         with: {
           players: true,
         },
+        orderBy: (games, { desc }) => [desc(games.createdAt)],
         limit: 1,
       },
     },

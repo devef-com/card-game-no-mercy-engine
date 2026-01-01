@@ -1,0 +1,1 @@
+ALTER TABLE `game` ADD `show_next_player_action` integer DEFAULT false NOT NULL;

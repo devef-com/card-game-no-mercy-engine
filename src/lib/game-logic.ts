@@ -39,6 +39,7 @@ export interface GameState {
   stackedPenalty: number;
   winnerId?: string;
   rouletteStatus?: "pending_color" | "drawing" | null;
+  showNextPlayerAction?: boolean;
 }
 
 export const COLORS: Color[] = ["red", "blue", "green", "yellow"];
