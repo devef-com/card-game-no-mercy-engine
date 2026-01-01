@@ -173,6 +173,9 @@ export const gamePlayer = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     hand: text("hand", { mode: "json" }).notNull(), // Array of cards
     cardCount: integer("card_count").notNull(),
+    cardCountAtEliminated: integer("card_count_at_eliminated")
+      .default(0)
+      .notNull(),
     isEliminated: integer("is_eliminated", { mode: "boolean" })
       .default(false)
       .notNull(),

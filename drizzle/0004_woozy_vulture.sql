@@ -1,0 +1,1 @@
+ALTER TABLE `game_player` ADD `card_count_at_eliminated` integer DEFAULT 0 NOT NULL;

@@ -106,6 +106,7 @@ async function getGameState(gameId: string): Promise<GameState | null> {
       hand: p.hand as Card[],
       isEliminated: p.isEliminated,
       score: p.score,
+      cardCountAtEliminated: p.cardCountAtEliminated,
     })),
     currentTurnUserId: gameRecord.currentTurnUserId!,
     direction: gameRecord.direction as 1 | -1,
@@ -286,9 +287,11 @@ export async function drawCard(gameId: string) {
 
   // Calculate cards to draw
   let drawCount = 1;
+  let tookPenalty = false;
   if (gameState.stackedPenalty > 0) {
     drawCount = gameState.stackedPenalty;
     gameState.stackedPenalty = 0; // Reset penalty after drawing
+    tookPenalty = true;
   }
 
   // Draw cards
@@ -308,10 +311,12 @@ export async function drawCard(gameId: string) {
   // Mercy Rule Check
   if (player.hand.length >= 25) {
     player.isEliminated = true;
-
+    const playerHandLength = player.hand.length;
     // Move eliminated player's cards to the end of the discard pile
     gameState.discardPile.push(...player.hand);
+
     player.hand = [];
+    player.cardCountAtEliminated = playerHandLength;
 
     // Log elimination
     await db.insert(gameMove).values({
@@ -337,9 +342,10 @@ export async function drawCard(gameId: string) {
     canPlayCard(card, gameState)
   );
 
-  // Only advance turn if no playable card was drawn or player was eliminated
-  if (!hasPlayableCard || player.isEliminated) {
-    console.log("Advancing turn to next player");
+  if (tookPenalty || !hasPlayableCard || player.isEliminated) {
+    console.log(
+      tookPenalty ? `Drew penalty cards: ${drawCount}` : "Advancing turn"
+    );
     gameState.currentTurnUserId = getNextPlayer(
       gameState.currentTurnUserId,
       gameState.players,

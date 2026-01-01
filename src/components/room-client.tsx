@@ -490,7 +490,7 @@ export function RoomClient({ room: initialRoom, currentUser, players: initialPla
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600 dark:text-gray-400">Cards Left</p>
-                        <p className="text-2xl font-bold">{player.cardCount}</p>
+                        <p className="text-2xl font-bold">{player.cardCountAtEliminated}</p>
                       </div>
                     </div>
                   );

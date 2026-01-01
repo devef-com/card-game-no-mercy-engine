@@ -24,6 +24,7 @@ export interface PlayerState {
   hand: Card[];
   isEliminated: boolean;
   score: number;
+  cardCountAtEliminated: number;
 }
 
 export interface GameState {
@@ -149,6 +150,7 @@ export function initializeGame(
     hand: [],
     isEliminated: false,
     score: 0,
+    cardCountAtEliminated: 0,
   }));
 
   const deck = generateDeck(players.length);
@@ -374,6 +376,7 @@ export function handleRouletteChoice(
     // Mercy rule check is handled in the action to allow DB updates
     if (player.hand.length >= 25) {
       player.isEliminated = true;
+      player.cardCountAtEliminated = player.hand.length;
       break;
     }
   }
